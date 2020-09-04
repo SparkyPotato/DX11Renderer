@@ -1,0 +1,27 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\CMake\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "BUILD_SHARED_LIBS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+          "value": "False",
+          "type": "BOOL"
+        }
+      ]
+    }
+  ]
+}

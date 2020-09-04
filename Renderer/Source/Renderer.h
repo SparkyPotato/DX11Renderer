@@ -8,6 +8,8 @@ public:
 
 	void Render(float deltaTime);
 
+	void Resize();
+
 private:
 	ID3D11Device* p_Device;
 	ID3D11DeviceContext* p_Context;

@@ -18,6 +18,11 @@ LRESULT WINAPI WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lPara
 		IsRunning = false;
 		return 0;
 	}
+	case WM_SIZE:
+	{
+		if (GRenderer) GRenderer->Resize();
+		break;
+	}
 	}
 
 	return DefWindowProc(window, message, wParam, lParam);
