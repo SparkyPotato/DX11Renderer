@@ -15,34 +15,39 @@ VertexShader* GraphicsContext::m_CurrentVertexShader = nullptr;
 
 void GraphicsContext::Init(HWND window)
 {
+	// This describes the settings of the swap chain.
+	// The swap chain contains the back buffer of the window, and is responsible for swapping the buffers and showing
+	// the rendered image to the user every frame
 	DXGI_SWAP_CHAIN_DESC sDesc;
 	ZeroMemory(&sDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
-	sDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	sDesc.BufferDesc.Width = 0;
-	sDesc.BufferDesc.Height = 0;
-	sDesc.BufferDesc.RefreshRate.Numerator = 0;
-	sDesc.BufferDesc.RefreshRate.Denominator = 0;
-	sDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
-	sDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
-	sDesc.SampleDesc.Count = 1;
-	sDesc.SampleDesc.Quality = 0;
-	sDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sDesc.BufferCount = 2;
-	sDesc.OutputWindow = window;
-	sDesc.Windowed = true;
-	sDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	sDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // 8-bit per color, to give a total of 256 values for each color
+	sDesc.BufferDesc.Width = 0; // This automatically infers the width and height from the window
+	sDesc.BufferDesc.Height = 0; // ^
+	sDesc.BufferDesc.RefreshRate.Numerator = 0; // We don't have any refresh rate limits
+	sDesc.BufferDesc.RefreshRate.Denominator = 0; // ^
+	sDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED; // Stretch the image while resizing the window
+	sDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE; // Progressive scanline ordering, for those 1080p displays
+	sDesc.SampleDesc.Count = 1; // No multisampling, no anti-aliasing
+	sDesc.SampleDesc.Quality = 0; // ^
+	sDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // The swap chain buffers are created to be used as render targets, so we can actually draw on them
+	sDesc.BufferCount = 2; // 2 buffers, so we aren't drawing directly to the front buffer
+	sDesc.OutputWindow = window; // Setting the swap chain to use our window created in the entry point
+	sDesc.Windowed = true; // Start off in windowed mode
+	sDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // Set the swap chain to flip the buffers on every present call, but discard the previous frame
 	sDesc.Flags = NULL;
 
+	// Create a device only using Direct3D 11 or 11.1
 	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_11_1 };
+	// Create the actual DirectX device, context, and swap chain
 	HRESULT hr = D3D11CreateDeviceAndSwapChain
 	(
 		NULL,
-		D3D_DRIVER_TYPE_HARDWARE,
+		D3D_DRIVER_TYPE_HARDWARE, // Make sure we use hardware acceleration
 		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
+		D3D11_CREATE_DEVICE_DEBUG, // Create the device with the debug layer so we know when we make mistakes
 		featureLevels,
 		sizeof(featureLevels) / sizeof(D3D_FEATURE_LEVEL),
-		D3D11_SDK_VERSION,
+		D3D11_SDK_VERSION, // Use the SDK version installed on the system
 		&sDesc,
 		&SwapChain,
 		&Device,
@@ -52,6 +57,7 @@ void GraphicsContext::Init(HWND window)
 
 	if (FAILED(hr))
 	{
+		// If we fail, drop a message box as usual and throw an exception to stop application execution
 		MessageBox(window, L"Failed to initialize Direct3D 11!", L"Startup Error", MB_OK | MB_ICONERROR);
 		throw std::exception("DirectX 11 initialization fail");
 	}
