@@ -4,7 +4,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 
-#include "Renderer.h"
+#include "Renderer/Renderer.h"
 
 static Renderer* GRenderer = nullptr;
 static bool IsRunning = true;

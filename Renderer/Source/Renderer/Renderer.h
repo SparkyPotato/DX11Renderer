@@ -1,5 +1,7 @@
 #pragma once
 
+class Scene;
+
 class Renderer
 {
 public:
@@ -16,4 +18,7 @@ private:
 	IDXGISwapChain* p_SwapChain;
 
 	ID3D11RenderTargetView* p_RenderTarget = nullptr;
+	ID3D11DepthStencilView* p_DepthStencil = nullptr;
+
+	Scene* m_Scene = nullptr;
 };
