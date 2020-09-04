@@ -83,16 +83,30 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Entry.cpp" />
+    <ClCompile Include="Source\Primitives\Buffer.cpp" />
+    <ClCompile Include="Source\Primitives\GraphicsContext.cpp" />
+    <ClCompile Include="Source\Primitives\Shader.cpp" />
     <ClCompile Include="Source\Renderer\Batcher.cpp" />
-    <ClCompile Include="Source\Renderer\Primitives.cpp" />
     <ClCompile Include="Source\Renderer\Renderer.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Primitives\Buffer.h" />
+    <ClInclude Include="Source\Primitives\GraphicsContext.h" />
+    <ClInclude Include="Source\Primitives\Shader.h" />
     <ClInclude Include="Source\Renderer\Batcher.h" />
-    <ClInclude Include="Source\Renderer\Primitives.h" />
     <ClInclude Include="Source\Renderer\Renderer.h" />
     <ClInclude Include="Source\Scene\Scene.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\Renderer\Shaders\PixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Renderer\Shaders\VertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

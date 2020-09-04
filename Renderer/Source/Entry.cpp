@@ -4,6 +4,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 
+#include "Primitives/GraphicsContext.h"
 #include "Renderer/Renderer.h"
 
 static Renderer* GRenderer = nullptr;
@@ -72,50 +73,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	ShowWindow(window, nShowCmd);
 
-	Microsoft::WRL::ComPtr<ID3D11Device> p_Device;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> p_Context;
-	Microsoft::WRL::ComPtr<IDXGISwapChain> p_SwapChain;
-
-	DXGI_SWAP_CHAIN_DESC sDesc;
-	ZeroMemory(&sDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
-	sDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	sDesc.BufferDesc.Width = 0;
-	sDesc.BufferDesc.Height = 0;
-	sDesc.BufferDesc.RefreshRate.Numerator = 0;
-	sDesc.BufferDesc.RefreshRate.Denominator = 0;
-	sDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
-	sDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
-	sDesc.SampleDesc.Count = 1;
-	sDesc.SampleDesc.Quality = 0;
-	sDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sDesc.BufferCount = 2;
-	sDesc.OutputWindow = window;
-	sDesc.Windowed = true;
-	sDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	sDesc.Flags = NULL;
-
-	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_11_1 };
-	HRESULT hr = D3D11CreateDeviceAndSwapChain
-	(
-		NULL,
-		D3D_DRIVER_TYPE_HARDWARE,
-		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
-		featureLevels,
-		sizeof(featureLevels) / sizeof(D3D_FEATURE_LEVEL),
-		D3D11_SDK_VERSION,
-		&sDesc, 
-		&p_SwapChain,
-		&p_Device,
-		NULL,
-		&p_Context
-	);
-
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, L"Failed to initialize Direct3D 11!", L"Startup Error", MB_OK | MB_ICONERROR);
-		return -1;
-	}
+	GraphicsContext::Init(window);
 
 	LARGE_INTEGER frequency, lastTickTime, currentTickTime;
 	QueryPerformanceFrequency(&frequency);
@@ -123,7 +81,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	try
 	{
-		GRenderer = new Renderer(p_Device.Get(), p_Context.Get(), p_SwapChain.Get());
+		GRenderer = new Renderer;
 	}
 	catch (...)
 	{
@@ -147,7 +105,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		GRenderer->Render(deltaTime);
 
-		p_SwapChain->Present(0, 0);
+		GraphicsContext::SwapChain->Present(0, 0);
 
 		QueryPerformanceCounter(&lastTickTime);
 	}

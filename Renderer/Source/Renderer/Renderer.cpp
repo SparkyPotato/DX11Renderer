@@ -3,13 +3,13 @@
 
 #include "Renderer.h"
 #include "Scene/Scene.h"
-#include "Primitives.h"
+#include "Primitives/GraphicsContext.h"
+#include "Primitives/Buffer.h"
 
-Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwapChain* swapchain)
-	: p_Device(device), p_Context(context), p_SwapChain(swapchain)
+Renderer::Renderer()
 {
 	ID3D11Texture2D* backBuffer;
-	HRESULT hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**) &backBuffer);
+	HRESULT hr = GraphicsContext::SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**) &backBuffer);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to get window back buffer!", L"Startup Error", MB_OK | MB_ICONERROR);
@@ -17,7 +17,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwap
 		throw std::exception("Render Target creation failed");
 	}
 
-	hr = p_Device->CreateRenderTargetView(backBuffer, NULL, &p_RenderTarget);
+	hr = GraphicsContext::Device->CreateRenderTargetView(backBuffer, NULL, &p_RenderTarget);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to create Render Target View!", L"Startup Error", MB_OK | MB_ICONERROR);
@@ -44,7 +44,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwap
 	dstDesc.SampleDesc.Quality = 0;
 	dstDesc.Usage = D3D11_USAGE_DEFAULT;
 
-	hr = p_Device->CreateTexture2D(&dstDesc, NULL, &depthStencilTexture);
+	hr = GraphicsContext::Device->CreateTexture2D(&dstDesc, NULL, &depthStencilTexture);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil texture!", L"Startup Error", MB_OK | MB_ICONERROR);
@@ -58,7 +58,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwap
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 	dsvDesc.Texture2D.MipSlice = 0;
 
-	hr = p_Device->CreateDepthStencilView(depthStencilTexture, &dsvDesc, &p_DepthStencil);
+	hr = GraphicsContext::Device->CreateDepthStencilView(depthStencilTexture, &dsvDesc, &p_DepthStencil);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil view!", L"Startup Error", MB_OK | MB_ICONERROR);
@@ -77,7 +77,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwap
 	dsDesc.StencilWriteMask = NULL;
 	
 	ID3D11DepthStencilState* depthStencilState;
-	hr = p_Device->CreateDepthStencilState(&dsDesc, &depthStencilState);
+	hr = GraphicsContext::Device->CreateDepthStencilState(&dsDesc, &depthStencilState);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil state!", L"Startup Error", MB_OK | MB_ICONERROR);
@@ -85,10 +85,22 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwap
 		throw std::exception("Depth Stencil creation failed");
 	}
 
-	p_Context->OMSetDepthStencilState(depthStencilState, 0);
+	GraphicsContext::Context->OMSetDepthStencilState(depthStencilState, 0);
 	depthStencilState->Release();
 
 	m_Scene = new Scene;
+
+	GraphicsContext::Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0.f;
+	vp.TopLeftY = 0.f;
+	vp.MinDepth = 0.f;
+	vp.MaxDepth = 1.f;
+	vp.Width = (float) bbDesc.Width;
+	vp.Height = (float) bbDesc.Height;
+
+	GraphicsContext::Context->RSSetViewports(1, &vp);
 }
 
 Renderer::~Renderer()
@@ -102,9 +114,9 @@ Renderer::~Renderer()
 void Renderer::Render(float deltaTime)
 {
 	float color[] = { 0.11f, 0.18f, 0.96f, 1.f };
-	p_Context->ClearRenderTargetView(p_RenderTarget, color);
+	GraphicsContext::Context->ClearRenderTargetView(p_RenderTarget, color);
 
-	p_Context->OMSetRenderTargets(1, &p_RenderTarget, p_DepthStencil);
+	GraphicsContext::Context->OMSetRenderTargets(1, &p_RenderTarget, p_DepthStencil);
 }
 
 void Renderer::Resize()
@@ -112,14 +124,14 @@ void Renderer::Resize()
 	if (p_RenderTarget) p_RenderTarget->Release();
 	if (p_DepthStencil) p_DepthStencil->Release();
 
-	HRESULT hr = p_SwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	HRESULT hr = GraphicsContext::SwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to resize swap chain!", L"Runtime Error", MB_OK | MB_ICONERROR);
 	}
 
 	ID3D11Texture2D* backBuffer;
-	hr = p_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
+	hr = GraphicsContext::SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to get window back buffer!", L"Runtime Error", MB_OK | MB_ICONERROR);
@@ -127,7 +139,7 @@ void Renderer::Resize()
 		throw std::exception("Render Target creation failed");
 	}
 
-	hr = p_Device->CreateRenderTargetView(backBuffer, NULL, &p_RenderTarget);
+	hr = GraphicsContext::Device->CreateRenderTargetView(backBuffer, NULL, &p_RenderTarget);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to create Render Target View!", L"Runtime Error", MB_OK | MB_ICONERROR);
@@ -154,7 +166,7 @@ void Renderer::Resize()
 	dstDesc.SampleDesc.Quality = 0;
 	dstDesc.Usage = D3D11_USAGE_DEFAULT;
 
-	hr = p_Device->CreateTexture2D(&dstDesc, NULL, &depthStencilTexture);
+	hr = GraphicsContext::Device->CreateTexture2D(&dstDesc, NULL, &depthStencilTexture);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil texture!", L"Startup Error", MB_OK | MB_ICONERROR);
@@ -162,7 +174,7 @@ void Renderer::Resize()
 		throw std::exception("Depth Stencil creation failed");
 	}
 
-	hr = p_Device->CreateDepthStencilView(depthStencilTexture, NULL, &p_DepthStencil);
+	hr = GraphicsContext::Device->CreateDepthStencilView(depthStencilTexture, NULL, &p_DepthStencil);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil view!", L"Startup Error", MB_OK | MB_ICONERROR);
@@ -172,5 +184,15 @@ void Renderer::Resize()
 
 	depthStencilTexture->Release();
 
-	p_Context->Flush();
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0.f;
+	vp.TopLeftY = 0.f;
+	vp.MinDepth = 0.f;
+	vp.MaxDepth = 1.f;
+	vp.Width = (float) bbDesc.Width;
+	vp.Height = (float) bbDesc.Height;
+
+	GraphicsContext::Context->RSSetViewports(1, &vp);
+
+	GraphicsContext::Context->Flush();
 }

@@ -27,7 +27,13 @@
     <ClCompile Include="Source\Renderer\Batcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Renderer\Primitives.cpp">
+    <ClCompile Include="Source\Primitives\Buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Primitives\GraphicsContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Primitives\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,8 +47,18 @@
     <ClInclude Include="Source\Renderer\Batcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\Primitives.h">
+    <ClInclude Include="Source\Primitives\Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Primitives\GraphicsContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Primitives\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\Renderer\Shaders\VertexShader.hlsl" />
+    <FxCompile Include="Source\Renderer\Shaders\PixelShader.hlsl" />
   </ItemGroup>
 </Project>
