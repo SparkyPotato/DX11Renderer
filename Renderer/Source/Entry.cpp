@@ -4,6 +4,9 @@
 
 #pragma comment(lib, "d3d11.lib")
 
+#include "examples/imgui_impl_win32.h"
+#include "examples/imgui_impl_dx11.h"
+
 #include "Primitives/GraphicsContext.h"
 #include "Renderer/Renderer.h"
 
@@ -15,6 +18,9 @@ static bool IsRunning = true;
 
 // Forward declaring the Window Procedure so WinMain can be on the top
 static LRESULT WINAPI WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
+
+// Declaring the ImGui Window Procedure so we can call it in ours
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // --------------- Entry Point ---------------
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
@@ -72,6 +78,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// End Window Creation
 
+	// Setup ImGui
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.DisplaySize = { 100.f, 100.f };
+
+	ImGui::StyleColorsDark();
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		style.WindowRounding = 0.f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.f;
+	}
+
+	// Set the window style.
+	style.ChildRounding = 0.f;
+	style.GrabRounding = 3.f;
+	style.WindowRounding = 3.f;
+	style.ScrollbarRounding = 3.f;
+	style.FrameRounding = 3.f;
+	style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+
+	ImGui_ImplWin32_Init(window);
+
 	try
 	{
 		// Initializes DirectX 11
@@ -99,7 +131,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return -1;
 	}
 
-	// Varible the keeps track of delta time
+	// Variable that keeps track of delta time
 	float deltaTime;
 
 	MSG message;
@@ -122,6 +154,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// Render
 		GRenderer->Render(deltaTime);
 
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+
+		GRenderer->RenderGui();
+
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+		// Update windows for ImGui viewports.
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+
 		// Present the rendered frame to the user
 		GraphicsContext::SwapChain->Present(0, 0);
 
@@ -134,6 +179,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Set it to nullptr so if the Window Procedure tries to access it, we don't crash
 	GRenderer = nullptr;
 
+	GraphicsContext::DeInit();
+	ImGui_ImplWin32_Shutdown();
+
+	ImGui::DestroyContext();
+
 	// Destroy the window before exiting
 	DestroyWindow(window);
 
@@ -143,6 +193,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 // Our Window Procedure
 static LRESULT WINAPI WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	// Pass on all events to ImGui
+	ImGui_ImplWin32_WndProcHandler(window, message, wParam, lParam);
+
 	switch (message)
 	{
 	case WM_CLOSE:

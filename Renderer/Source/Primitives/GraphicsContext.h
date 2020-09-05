@@ -10,6 +10,7 @@ class GraphicsContext
 {
 public:
 	static void Init(HWND window);
+	static void DeInit();
 
 	static void BindVertexBuffer(VertexBuffer* buffer);
 	static void BindVertexShader(VertexShader* shader);

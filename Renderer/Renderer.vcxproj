@@ -55,7 +55,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Assimp\include;$(SolutionDir)CMake\x64\Assimp\include;$(SolutionDir)Renderer\Source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Assimp\include;$(SolutionDir)CMake\x64\Assimp\include;$(SolutionDir)Renderer\Source;$(SolutionDir)ImGui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -71,7 +71,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Assimp\include;$(SolutionDir)CMake\x64\Assimp\include;$(SolutionDir)Renderer\Source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Assimp\include;$(SolutionDir)CMake\x64\Assimp\include;$(SolutionDir)Renderer\Source;$(SolutionDir)ImGui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -82,6 +82,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\BuildImGui.cpp" />
     <ClCompile Include="Source\Entry.cpp" />
     <ClCompile Include="Source\Primitives\Buffer.cpp" />
     <ClCompile Include="Source\Primitives\GraphicsContext.cpp" />
@@ -89,6 +90,7 @@
     <ClCompile Include="Source\Renderer\Batcher.cpp" />
     <ClCompile Include="Source\Renderer\Renderer.cpp" />
     <ClCompile Include="Source\Scene\Camera.cpp" />
+    <ClCompile Include="Source\Scene\Object.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +100,7 @@
     <ClInclude Include="Source\Renderer\Batcher.h" />
     <ClInclude Include="Source\Renderer\Renderer.h" />
     <ClInclude Include="Source\Scene\Camera.h" />
+    <ClInclude Include="Source\Scene\Object.h" />
     <ClInclude Include="Source\Scene\Scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

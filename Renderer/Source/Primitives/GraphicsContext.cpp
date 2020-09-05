@@ -2,6 +2,8 @@
 
 #include "GraphicsContext.h"
 
+#include "examples/imgui_impl_dx11.h"
+
 #include "Buffer.h"
 #include "Shader.h"
 
@@ -73,6 +75,13 @@ void GraphicsContext::Init(HWND window)
 		m_BoundVSConstantBuffers[i] = nullptr;
 		m_BoundPSConstantBuffers[i] = nullptr;
 	}
+
+	ImGui_ImplDX11_Init(Device.Get(), Context.Get());
+}
+
+void GraphicsContext::DeInit()
+{
+	ImGui_ImplDX11_Shutdown();
 }
 
 void GraphicsContext::BindVertexBuffer(VertexBuffer* buffer)

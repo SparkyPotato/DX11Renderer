@@ -1,8 +1,11 @@
 #include <exception>
 #include <d3d11.h>
 
+#include "imgui.h"
+
 #include "Renderer.h"
 #include "Scene/Scene.h"
+#include "Scene/Object.h"
 
 Renderer::Renderer()
 	: m_MainCamera(ProjectionMode::Perspective, 1.f, 0.5f, 1000.f), m_CameraData({ DirectX::XMMatrixIdentity() })
@@ -123,9 +126,9 @@ Renderer::Renderer()
 
 	m_CameraBuffer = new ConstantBuffer(nullptr, sizeof(CameraBuffer), ConstantBufferTarget::VertexShader);
 
-
+	
+	m_MainCamera.Resize((float)bbDesc.Width / (float)bbDesc.Height);
 	m_Scene = new Scene;
-	m_MainCamera.Resize((float) bbDesc.Width / (float) bbDesc.Height);
 }
 
 Renderer::~Renderer()
@@ -151,6 +154,11 @@ void Renderer::Render(float deltaTime)
 	m_CameraData.viewProjection = DirectX::XMMatrixInverse(nullptr, m_MainCamera.GetViewProjection());
 	m_CameraBuffer->Set(&m_CameraData);
 	m_CameraBuffer->Bind(0);
+}
+
+void Renderer::RenderGui()
+{
+	
 }
 
 void Renderer::Resize()

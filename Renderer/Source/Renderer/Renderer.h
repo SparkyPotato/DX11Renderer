@@ -13,6 +13,7 @@ public:
 	~Renderer();
 
 	void Render(float deltaTime);
+	void RenderGui();
 
 	void Resize();
 
