@@ -89,7 +89,7 @@ class VertexBuffer
 {
 public:
 	VertexBuffer(const VertexLayout& layout, BufferAccess access, void* data, unsigned int elementCount);
-	~VertexBuffer();
+	~VertexBuffer() = default;
 
 	void Bind();
 	void Unbind();
@@ -113,7 +113,7 @@ class IndexBuffer
 {
 public:
 	IndexBuffer(BufferAccess access, unsigned int* indices, unsigned int indexCount);
-	~IndexBuffer();
+	~IndexBuffer() = default;
 
 	void Bind();
 	void Unbind();
@@ -129,4 +129,31 @@ private:
 	
 	unsigned int m_Size;
 	BufferAccess m_Access;
+};
+
+enum class ConstantBufferTarget
+{
+	VertexShader, PixelShader
+};
+
+class ConstantBuffer
+{
+public:
+	ConstantBuffer(void* data, size_t size, ConstantBufferTarget target);
+	~ConstantBuffer() = default;
+
+	void Bind(unsigned int slot = 0);
+	void Unbind();
+
+	void Set(void* data);
+
+	ID3D11Buffer* GetBuffer() { return p_Buffer.Get(); }
+	void SetUnboundSlot() { m_Slot = -1; }
+
+private:
+	Microsoft::WRL::ComPtr<ID3D11Buffer> p_Buffer = nullptr;
+
+	size_t m_Size;
+	unsigned int m_Slot = -1;
+	ConstantBufferTarget m_Target;
 };

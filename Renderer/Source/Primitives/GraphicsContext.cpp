@@ -13,6 +13,11 @@ VertexBuffer* GraphicsContext::m_LastVertexBuffer = nullptr;
 VertexBuffer* GraphicsContext::m_CurrentVertexBuffer = nullptr;
 VertexShader* GraphicsContext::m_CurrentVertexShader = nullptr;
 
+ConstantBuffer* GraphicsContext::m_BoundVSConstantBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
+ID3D11Buffer* GraphicsContext::m_VSConstantBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
+ConstantBuffer* GraphicsContext::m_BoundPSConstantBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
+ID3D11Buffer* GraphicsContext::m_PSConstantBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
+
 void GraphicsContext::Init(HWND window)
 {
 	// This describes the settings of the swap chain.
@@ -61,6 +66,13 @@ void GraphicsContext::Init(HWND window)
 		MessageBox(window, L"Failed to initialize Direct3D 11!", L"Startup Error", MB_OK | MB_ICONERROR);
 		throw std::exception("DirectX 11 initialization fail");
 	}
+
+	// We set all bound constant buffers to nullptr because there's nothing bound
+	for (int i = 0; i < D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT; i++)
+	{
+		m_BoundVSConstantBuffers[i] = nullptr;
+		m_BoundPSConstantBuffers[i] = nullptr;
+	}
 }
 
 void GraphicsContext::BindVertexBuffer(VertexBuffer* buffer)
@@ -108,6 +120,36 @@ void GraphicsContext::BindVertexShader(VertexShader* shader)
 	InputLayoutSetup();
 
 	Context->VSSetShader(d3dshader, NULL, 0);
+}
+
+void GraphicsContext::BindVSConstantBuffer(ConstantBuffer* buffer, unsigned int slot)
+{
+	if (slot >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT)
+	{
+		MessageBox(NULL, L"Constant Buffer cannot be bound to the slot", L"Runtime Error", MB_OK | MB_ICONERROR);
+	}
+
+	if (m_BoundVSConstantBuffers[slot]) m_BoundVSConstantBuffers[slot]->SetUnboundSlot();
+
+	m_BoundVSConstantBuffers[slot] = buffer;
+	m_VSConstantBuffers[slot] = buffer->GetBuffer();
+
+	Context->VSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, m_VSConstantBuffers);
+}
+
+void GraphicsContext::BindPSConstantBuffer(ConstantBuffer* buffer, unsigned int slot)
+{
+	if (slot >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT)
+	{
+		MessageBox(NULL, L"Constant Buffer cannot be bound to the slot", L"Runtime Error", MB_OK | MB_ICONERROR);
+	}
+
+	if (m_BoundPSConstantBuffers[slot]) m_BoundPSConstantBuffers[slot]->SetUnboundSlot();
+
+	m_BoundPSConstantBuffers[slot] = buffer;
+	m_PSConstantBuffers[slot] = buffer->GetBuffer();
+
+	Context->PSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, m_PSConstantBuffers);
 }
 
 void GraphicsContext::InputLayoutSetup()

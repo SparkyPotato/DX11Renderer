@@ -36,6 +36,9 @@
     <ClCompile Include="Source\Primitives\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Scene\Scene.h">
@@ -56,9 +59,8 @@
     <ClInclude Include="Source\Primitives\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Source\Renderer\Shaders\VertexShader.hlsl" />
-    <FxCompile Include="Source\Renderer\Shaders\PixelShader.hlsl" />
+    <ClInclude Include="Source\Scene\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

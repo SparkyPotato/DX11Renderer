@@ -1,7 +1,8 @@
 #pragma once
 #include "Primitives/GraphicsContext.h"
 #include "Primitives/Buffer.h"
-#include "Primitives/Shader.h"
+
+#include "Scene/Camera.h"
 
 class Scene;
 
@@ -19,9 +20,14 @@ private:
 	ID3D11RenderTargetView* p_RenderTarget = nullptr;
 	ID3D11DepthStencilView* p_DepthStencil = nullptr;
 
+	struct CameraBuffer
+	{
+		DirectX::XMMATRIX viewProjection;
+	};
+	ConstantBuffer* m_CameraBuffer;
+	CameraBuffer m_CameraData;
+
 	Scene* m_Scene = nullptr;
 
-	VertexBuffer* m_Buffer;
-	VertexShader* m_VShader;
-	PixelShader* m_PShader;
+	Camera m_MainCamera;
 };

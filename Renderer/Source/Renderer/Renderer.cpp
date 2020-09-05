@@ -5,6 +5,7 @@
 #include "Scene/Scene.h"
 
 Renderer::Renderer()
+	: m_MainCamera(ProjectionMode::Perspective, 1.f, 0.5f, 1000.f), m_CameraData({ DirectX::XMMatrixIdentity() })
 {
 	// Grab the back buffer from the swap chain
 	ID3D11Texture2D* backBuffer;
@@ -105,8 +106,6 @@ Renderer::Renderer()
 	// Release our reference to the state since we aren't touching it anymore
 	depthStencilState->Release();
 
-	m_Scene = new Scene;
-
 	// Tell the runtime that everything we render is going to be supplied as a list of triangles
 	GraphicsContext::Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -122,21 +121,11 @@ Renderer::Renderer()
 	// Bind the viewport to the pipeline
 	GraphicsContext::Context->RSSetViewports(1, &vp);
 
-	VertexLayout layout =
-	{
-		{ "POSITION", ElementDataType::float4 }
-	};
-	float positions[12] =
-	{
-		-0.5f, -0.5f, 0.f, 1.f,
-		0.f, 0.5f, 0.f, 1.f,
-		0.5f, -0.5f, 0.f, 1.f,
-	};
+	m_CameraBuffer = new ConstantBuffer(nullptr, sizeof(CameraBuffer), ConstantBufferTarget::VertexShader);
 
-	m_Buffer = new VertexBuffer(layout, BufferAccess::Static, positions, 3);
 
-	m_VShader = new VertexShader(L"VertexShader.cso");
-	m_PShader = new PixelShader(L"PixelShader.cso");
+	m_Scene = new Scene;
+	m_MainCamera.Resize((float) bbDesc.Width / (float) bbDesc.Height);
 }
 
 Renderer::~Renderer()
@@ -144,11 +133,9 @@ Renderer::~Renderer()
 	if (p_RenderTarget) p_RenderTarget->Release();
 	if (p_DepthStencil) p_DepthStencil->Release();
 
-	delete m_Scene;
+	delete m_CameraBuffer;
 
-	delete m_Buffer;
-	delete m_VShader;
-	delete m_PShader;
+	delete m_Scene;
 }
 
 void Renderer::Render(float deltaTime)
@@ -161,11 +148,9 @@ void Renderer::Render(float deltaTime)
 	// Make sure we're rendering to our render target, because it could've been recreated on a resize event
 	GraphicsContext::Context->OMSetRenderTargets(1, &p_RenderTarget, p_DepthStencil);
 
-	m_Buffer->Bind();
-	m_VShader->Bind();
-	m_PShader->Bind();
-
-	GraphicsContext::Context->Draw(3, 0);
+	m_CameraData.viewProjection = DirectX::XMMatrixInverse(nullptr, m_MainCamera.GetViewProjection());
+	m_CameraBuffer->Set(&m_CameraData);
+	m_CameraBuffer->Bind(0);
 }
 
 void Renderer::Resize()
@@ -253,4 +238,6 @@ void Renderer::Resize()
 	// Flush all commands so we don't keep building up a list of commands when the user is resizing the window.
 	// This helps us keep memory usage to a sane level, instead of it shooting up to around 1 GB for a long resize
 	GraphicsContext::Context->Flush();
+
+	m_MainCamera.Resize((float) bbDesc.Width / (float) bbDesc.Height);
 }

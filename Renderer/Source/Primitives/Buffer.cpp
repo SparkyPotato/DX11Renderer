@@ -7,11 +7,6 @@ VertexBuffer::VertexBuffer(const VertexLayout& layout, BufferAccess access, void
 	Create(data);
 }
 
-VertexBuffer::~VertexBuffer()
-{
-	
-}
-
 void VertexBuffer::Bind()
 {
 	GraphicsContext::BindVertexBuffer(this);
@@ -80,11 +75,6 @@ IndexBuffer::IndexBuffer(BufferAccess access, unsigned int* indices, unsigned in
 	Create(indices);
 }
 
-IndexBuffer::~IndexBuffer()
-{
-
-}
-
 void IndexBuffer::Bind()
 {
 	GraphicsContext::Context->IASetIndexBuffer(p_Buffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -130,15 +120,14 @@ void IndexBuffer::Create(unsigned int* indices)
 	desc.MiscFlags = NULL;
 	desc.Usage = usage;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
 	HRESULT hr;
 	if (indices == nullptr)
-		hr = GraphicsContext::Device->CreateBuffer(&desc, NULL, &buffer);
+		hr = GraphicsContext::Device->CreateBuffer(&desc, NULL, &p_Buffer);
 	else
 	{
 		D3D11_SUBRESOURCE_DATA sr;
 		sr.pSysMem = indices;
-		hr = GraphicsContext::Device->CreateBuffer(&desc, &sr, &buffer);
+		hr = GraphicsContext::Device->CreateBuffer(&desc, &sr, &p_Buffer);
 	}
 
 	if (FAILED(hr))
@@ -146,4 +135,61 @@ void IndexBuffer::Create(unsigned int* indices)
 		MessageBox(NULL, L"Failed to create index buffer!", L"Object Error", MB_OK | MB_ICONERROR);
 		__debugbreak();
 	}
+}
+
+ConstantBuffer::ConstantBuffer(void* data, size_t size, ConstantBufferTarget target)
+	: m_Size(size), m_Target(target)
+{
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(D3D11_BUFFER_DESC));
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.ByteWidth = (UINT) size;
+	desc.StructureByteStride = (UINT) size;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = NULL;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+
+	HRESULT hr;
+	if (data == nullptr)
+		hr = GraphicsContext::Device->CreateBuffer(&desc, NULL, &p_Buffer);
+	else
+	{
+		D3D11_SUBRESOURCE_DATA sr;
+		sr.pSysMem = data;
+		hr = GraphicsContext::Device->CreateBuffer(&desc, &sr, &p_Buffer);
+	}
+
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to create constant buffer!", L"Object Error", MB_OK | MB_ICONERROR);
+		__debugbreak();
+	}
+}
+
+void ConstantBuffer::Bind(unsigned int slot)
+{
+	switch (m_Target)
+	{
+	case ConstantBufferTarget::VertexShader: GraphicsContext::BindVSConstantBuffer(this, slot); break;;
+	case ConstantBufferTarget::PixelShader: GraphicsContext::BindPSConstantBuffer(this, slot); break;;
+	}
+
+	m_Slot = slot;
+}
+
+void ConstantBuffer::Unbind()
+{
+	switch (m_Target)
+	{
+	case ConstantBufferTarget::VertexShader: GraphicsContext::BindVSConstantBuffer(nullptr, m_Slot); break;;
+	case ConstantBufferTarget::PixelShader: GraphicsContext::BindPSConstantBuffer(nullptr, m_Slot); break;;
+	}
+}
+
+void ConstantBuffer::Set(void* data)
+{
+	D3D11_MAPPED_SUBRESOURCE sr;
+	GraphicsContext::Context->Map(p_Buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &sr);
+	memcpy(sr.pData, data, m_Size);
+	GraphicsContext::Context->Unmap(p_Buffer.Get(), 0);
 }
