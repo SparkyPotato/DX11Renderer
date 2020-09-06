@@ -87,7 +87,6 @@
     <ClCompile Include="Source\Primitives\Buffer.cpp" />
     <ClCompile Include="Source\Primitives\GraphicsContext.cpp" />
     <ClCompile Include="Source\Primitives\Shader.cpp" />
-    <ClCompile Include="Source\Renderer\Batcher.cpp" />
     <ClCompile Include="Source\Renderer\Renderer.cpp" />
     <ClCompile Include="Source\Scene\Camera.cpp" />
     <ClCompile Include="Source\Scene\Object.cpp" />
@@ -97,7 +96,6 @@
     <ClInclude Include="Source\Primitives\Buffer.h" />
     <ClInclude Include="Source\Primitives\GraphicsContext.h" />
     <ClInclude Include="Source\Primitives\Shader.h" />
-    <ClInclude Include="Source\Renderer\Batcher.h" />
     <ClInclude Include="Source\Renderer\Renderer.h" />
     <ClInclude Include="Source\Scene\Camera.h" />
     <ClInclude Include="Source\Scene\Object.h" />

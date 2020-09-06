@@ -158,7 +158,21 @@ void Renderer::Render(float deltaTime)
 
 void Renderer::RenderGui()
 {
-	
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("Scene"))
+		{
+			bool* selected = nullptr;
+			if (ImGui::MenuItem("Add Object", "", selected))
+			{
+				m_Scene->AddObject();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
+	}
 }
 
 void Renderer::Resize()

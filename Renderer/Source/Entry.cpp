@@ -87,21 +87,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	ImGui::StyleColorsDark();
 
-	ImGuiStyle& style = ImGui::GetStyle();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		style.WindowRounding = 0.f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.f;
-	}
-
-	// Set the window style.
-	style.ChildRounding = 0.f;
-	style.GrabRounding = 3.f;
-	style.WindowRounding = 3.f;
-	style.ScrollbarRounding = 3.f;
-	style.FrameRounding = 3.f;
-	style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
-
 	ImGui_ImplWin32_Init(window);
 
 	try
