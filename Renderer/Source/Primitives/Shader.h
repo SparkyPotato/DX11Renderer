@@ -22,8 +22,8 @@ public:
 	void Bind();
 	void Unbind();
 
-	ID3D11VertexShader* GetShader() { return p_Shader.Get(); }
-	ID3DBlob* GetBlob() { return p_Blob.Get(); }
+	ID3D11VertexShader* GetShader() const { return p_Shader.Get(); }
+	ID3DBlob* GetBlob() const { return p_Blob.Get(); }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> p_Shader;

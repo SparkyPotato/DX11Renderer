@@ -1,7 +1,10 @@
 #include <Windows.h>
+#include "imgui.h"
+
 #include "Scene.h"
 
-Scene::Scene()
+Scene::Scene(bool* isOpen)
+	: m_IsOpen(isOpen)
 {
 	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	if (FAILED(hr))
@@ -25,6 +28,12 @@ Scene::~Scene()
 {
 	p_FileOpen->Release();
 	CoUninitialize();
+
+	for (auto& sObj : m_SceneObjects)
+	{
+		delete sObj.vertexBuffer;
+		delete sObj.indexBuffer;
+	}
 }
 
 void Scene::AddObject()
@@ -48,7 +57,7 @@ void Scene::AddObject()
 				std::string path(size_needed, 0);
 				WideCharToMultiByte(CP_UTF8, 0, temp.c_str(), (int)temp.size(), &path[0], size_needed, NULL, NULL);
 
-				m_Objects.emplace_back(path);
+				AddObjectFromFile(path);
 			}
 			else
 			{
@@ -60,6 +69,49 @@ void Scene::AddObject()
 		else
 		{
 			MessageBox(NULL, L"Failed to get selected file!", L"Runtime Error", MB_OK | MB_ICONERROR);
+		}
+	}
+}
+
+void Scene::AddObjectFromFile(std::string filePath)
+{
+	try
+	{
+		Object obj(filePath, filePath);
+		m_Objects.push_back(obj);
+
+		SceneObject sObj =
+		{
+			obj.GetWorldMatrix(),
+			new VertexBuffer(m_VertexLayout, BufferAccess::Static, obj.GetVertices().data(), obj.GetVertices().size()),
+			new IndexBuffer(BufferAccess::Static, obj.GetIndices().data(), obj.GetIndices().size())
+		};
+		m_SceneObjects.push_back(sObj);
+	}
+	catch (...) {}
+}
+
+void Scene::DrawObjects()
+{
+	if (*m_IsOpen)
+	{
+		if (ImGui::Begin("Objects", m_IsOpen))
+		{
+			if (ImGui::Button("+"))
+			{
+				AddObject();
+			}
+
+			for (auto& object : m_Objects)
+			{
+				ImGui::Text("%s", object.Name.c_str());
+			}
+
+			ImGui::End();
+		}
+		else
+		{
+			ImGui::End();
 		}
 	}
 }

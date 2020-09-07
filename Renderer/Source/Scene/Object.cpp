@@ -6,7 +6,8 @@
 
 #include <Windows.h>
 
-Object::Object(std::string file)
+Object::Object(std::string name, std::string file)
+	: Name(name), m_World(DirectX::XMMatrixIdentity())
 {
 	Assimp::Importer importer;
 	auto scene = importer.ReadFile(file, aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_MaxQuality);
@@ -14,11 +15,12 @@ Object::Object(std::string file)
 	if (scene == nullptr)
 	{
 		MessageBox(NULL, L"Failed to load mesh!", L"Runtime Error", MB_OK | MB_ICONERROR);
-		return;
+		throw 0;
 	}
 	auto mesh = scene->mMeshes[0];
 	bool hasVertexColors = mesh->HasVertexColors(0);
 	bool hasNormals = mesh->HasNormals();
+	bool hasTexCoords = mesh->HasTextureCoords(0);
 
 	m_Vertices.resize(mesh->mNumVertices);
 
@@ -54,6 +56,17 @@ Object::Object(std::string file)
 			m_Vertices[i].normal.x = 0.f;
 			m_Vertices[i].normal.y = 0.f;
 			m_Vertices[i].normal.z = 0.f;
+		}
+
+		if (hasTexCoords)
+		{
+			m_Vertices[i].texcoord.u = mesh->mTextureCoords[0][i].x;
+			m_Vertices[i].texcoord.v = mesh->mTextureCoords[0][i].y;
+		}
+		else
+		{
+			m_Vertices[i].texcoord.u = 0.f;
+			m_Vertices[i].texcoord.v = 0.f;
 		}
 	}
 

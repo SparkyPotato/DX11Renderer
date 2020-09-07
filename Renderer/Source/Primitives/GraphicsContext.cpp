@@ -11,9 +11,9 @@ Microsoft::WRL::ComPtr<ID3D11Device> GraphicsContext::Device = nullptr;
 Microsoft::WRL::ComPtr<ID3D11DeviceContext> GraphicsContext::Context = nullptr;
 Microsoft::WRL::ComPtr<IDXGISwapChain> GraphicsContext::SwapChain = nullptr;
 
-VertexBuffer* GraphicsContext::m_LastVertexBuffer = nullptr;
-VertexBuffer* GraphicsContext::m_CurrentVertexBuffer = nullptr;
-VertexShader* GraphicsContext::m_CurrentVertexShader = nullptr;
+const VertexBuffer* GraphicsContext::m_LastVertexBuffer = nullptr;
+const VertexBuffer* GraphicsContext::m_CurrentVertexBuffer = nullptr;
+const VertexShader* GraphicsContext::m_CurrentVertexShader = nullptr;
 
 ConstantBuffer* GraphicsContext::m_BoundVSConstantBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
 ID3D11Buffer* GraphicsContext::m_VSConstantBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
@@ -84,7 +84,7 @@ void GraphicsContext::DeInit()
 	ImGui_ImplDX11_Shutdown();
 }
 
-void GraphicsContext::BindVertexBuffer(VertexBuffer* buffer)
+void GraphicsContext::BindVertexBuffer(const VertexBuffer* buffer)
 {
 	if (m_CurrentVertexBuffer == buffer) return;
 
@@ -111,7 +111,7 @@ void GraphicsContext::BindVertexBuffer(VertexBuffer* buffer)
 	Context->IASetVertexBuffers(0, 1, &d3dbuffer, &stride, &offset);
 }
 
-void GraphicsContext::BindVertexShader(VertexShader* shader)
+void GraphicsContext::BindVertexShader(const VertexShader* shader)
 {
 	m_CurrentVertexShader = shader;
 
@@ -131,7 +131,7 @@ void GraphicsContext::BindVertexShader(VertexShader* shader)
 	Context->VSSetShader(d3dshader, NULL, 0);
 }
 
-void GraphicsContext::BindVSConstantBuffer(ConstantBuffer* buffer, unsigned int slot)
+void GraphicsContext::BindVSConstantBuffer(const ConstantBuffer* buffer, unsigned int slot)
 {
 	if (slot >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT)
 	{
@@ -140,13 +140,13 @@ void GraphicsContext::BindVSConstantBuffer(ConstantBuffer* buffer, unsigned int 
 
 	if (m_BoundVSConstantBuffers[slot]) m_BoundVSConstantBuffers[slot]->SetUnboundSlot();
 
-	m_BoundVSConstantBuffers[slot] = buffer;
+	m_BoundVSConstantBuffers[slot] = const_cast<ConstantBuffer*>(buffer);
 	m_VSConstantBuffers[slot] = buffer->GetBuffer();
 
 	Context->VSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, m_VSConstantBuffers);
 }
 
-void GraphicsContext::BindPSConstantBuffer(ConstantBuffer* buffer, unsigned int slot)
+void GraphicsContext::BindPSConstantBuffer(const ConstantBuffer* buffer, unsigned int slot)
 {
 	if (slot >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT)
 	{
@@ -155,7 +155,7 @@ void GraphicsContext::BindPSConstantBuffer(ConstantBuffer* buffer, unsigned int 
 
 	if (m_BoundPSConstantBuffers[slot]) m_BoundPSConstantBuffers[slot]->SetUnboundSlot();
 
-	m_BoundPSConstantBuffers[slot] = buffer;
+	m_BoundPSConstantBuffers[slot] = const_cast<ConstantBuffer*>(buffer);
 	m_PSConstantBuffers[slot] = buffer->GetBuffer();
 
 	Context->PSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, m_PSConstantBuffers);
@@ -175,10 +175,10 @@ void GraphicsContext::InputLayoutSetup()
 
 			switch (element.type)
 			{
-			case ElementDataType::float1: format = DXGI_FORMAT_R32_FLOAT;
-			case ElementDataType::float2: format = DXGI_FORMAT_R32G32_FLOAT;
-			case ElementDataType::float3: format = DXGI_FORMAT_R32G32B32_FLOAT;
-			case ElementDataType::float4: format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			case ElementDataType::float1: format = DXGI_FORMAT_R32_FLOAT; break;
+			case ElementDataType::float2: format = DXGI_FORMAT_R32G32_FLOAT; break;
+			case ElementDataType::float3: format = DXGI_FORMAT_R32G32B32_FLOAT; break;
+			case ElementDataType::float4: format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
 			}
 
 			layout.push_back({ element.semantic.c_str(), 0, format, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });

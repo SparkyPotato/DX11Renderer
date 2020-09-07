@@ -8,7 +8,7 @@
 #include "Scene/Object.h"
 
 Renderer::Renderer()
-	: m_MainCamera(ProjectionMode::Perspective, 1.f, 0.5f, 1000.f), m_CameraData({ DirectX::XMMatrixIdentity() })
+	: m_MainCamera(ProjectionMode::Perspective, 1.f, 2.5f, 1000.f)
 {
 	// Grab the back buffer from the swap chain
 	ID3D11Texture2D* backBuffer;
@@ -124,11 +124,14 @@ Renderer::Renderer()
 	// Bind the viewport to the pipeline
 	GraphicsContext::Context->RSSetViewports(1, &vp);
 
-	m_CameraBuffer = new ConstantBuffer(nullptr, sizeof(CameraBuffer), ConstantBufferTarget::VertexShader);
+	m_ObjectBuffer = new ConstantBuffer(nullptr, sizeof(ObjectBuffer), ConstantBufferTarget::VertexShader);
+
+	m_UnlitVS = new VertexShader(L"UnlitVS.cso");
+	m_UnlitSolidPS = new PixelShader(L"UnlitSolidPS.cso");
 
 	
 	m_MainCamera.Resize((float)bbDesc.Width / (float)bbDesc.Height);
-	m_Scene = new Scene;
+	m_Scene = new Scene(&m_IsSceneOpen);
 }
 
 Renderer::~Renderer()
@@ -136,7 +139,10 @@ Renderer::~Renderer()
 	if (p_RenderTarget) p_RenderTarget->Release();
 	if (p_DepthStencil) p_DepthStencil->Release();
 
-	delete m_CameraBuffer;
+	delete m_UnlitVS;
+	delete m_UnlitSolidPS;
+
+	delete m_ObjectBuffer;
 
 	delete m_Scene;
 }
@@ -151,9 +157,20 @@ void Renderer::Render(float deltaTime)
 	// Make sure we're rendering to our render target, because it could've been recreated on a resize event
 	GraphicsContext::Context->OMSetRenderTargets(1, &p_RenderTarget, p_DepthStencil);
 
-	m_CameraData.viewProjection = DirectX::XMMatrixInverse(nullptr, m_MainCamera.GetViewProjection());
-	m_CameraBuffer->Set(&m_CameraData);
-	m_CameraBuffer->Bind(0);
+	m_UnlitVS->Bind();
+	m_UnlitSolidPS->Bind();
+	m_ObjectBuffer->Bind(0);
+
+	for (auto& object : m_Scene->GetSceneObjects())
+	{
+		m_ObjectData.world = object.worldMatrix;
+		m_ObjectData.worldViewProjection = object.worldMatrix * m_MainCamera.GetViewProjection();
+		m_ObjectBuffer->Set(&m_ObjectData);
+		object.vertexBuffer->Bind();
+		object.indexBuffer->Bind();
+
+		GraphicsContext::Context->DrawIndexed(object.indexBuffer->GetSize(), 0, 0);
+	}
 }
 
 void Renderer::RenderGui()
@@ -162,16 +179,33 @@ void Renderer::RenderGui()
 	{
 		if (ImGui::BeginMenu("Scene"))
 		{
-			bool* selected = nullptr;
-			if (ImGui::MenuItem("Add Object", "", selected))
-			{
-				m_Scene->AddObject();
-			}
+			ImGui::MenuItem("Camera", "", &m_IsCameraOpen);
+			ImGui::MenuItem("Objects", "", &m_IsSceneOpen);
 
 			ImGui::EndMenu();
 		}
 
 		ImGui::EndMainMenuBar();
+	}
+
+	m_Scene->DrawObjects();
+
+	if (m_IsCameraOpen)
+	{
+		if (ImGui::Begin("Camera Controls", &m_IsCameraOpen))
+		{
+			if (ImGui::DragFloat3("Position", m_CameraPosition, 0.01f, 0.005f, 0.002f, "%.3f", 1.f))
+			{
+				DirectX::XMFLOAT3 pos = { m_CameraPosition[0], m_CameraPosition[1], m_CameraPosition[2] };
+				m_MainCamera.SetPosition(DirectX::XMLoadFloat3(&pos));
+			}
+
+			ImGui::End();
+		}
+		else
+		{
+			ImGui::End();
+		}
 	}
 }
 

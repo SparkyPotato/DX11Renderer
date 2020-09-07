@@ -88,19 +88,19 @@ struct VertexLayout
 class VertexBuffer
 {
 public:
-	VertexBuffer(const VertexLayout& layout, BufferAccess access, void* data, unsigned int elementCount);
+	VertexBuffer(const VertexLayout& layout, BufferAccess access, const void* data, unsigned int elementCount);
 	~VertexBuffer() = default;
 
-	void Bind();
-	void Unbind();
+	void Bind() const;
+	void Unbind() const;
 
-	void Set(void* data, unsigned int elementCount);
+	void Set(const void* data, unsigned int elementCount);
 
-	const VertexLayout& GetLayout() { return m_Layout; }
-	ID3D11Buffer* GetBuffer() { return p_Buffer.Get(); }
+	const VertexLayout& GetLayout() const { return m_Layout; }
+	ID3D11Buffer* GetBuffer() const { return p_Buffer.Get(); }
 
 private:
-	void Create(void* data);
+	void Create(const void* data);
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> p_Buffer = nullptr;
 
@@ -112,18 +112,19 @@ private:
 class IndexBuffer
 {
 public:
-	IndexBuffer(BufferAccess access, unsigned int* indices, unsigned int indexCount);
+	IndexBuffer(BufferAccess access, const unsigned int* indices, unsigned int indexCount);
 	~IndexBuffer() = default;
 
-	void Bind();
-	void Unbind();
+	void Bind() const;
+	void Unbind() const;
 
-	void Set(unsigned int* indices, unsigned int indexCount);
+	void Set(const unsigned int* indices, unsigned int indexCount);
 
-	ID3D11Buffer* GetBuffer() { return p_Buffer.Get(); }
+	ID3D11Buffer* GetBuffer() const { return p_Buffer.Get(); }
+	unsigned int GetSize() const { return m_Size; }
 
 private:
-	void Create(unsigned int* indices);
+	void Create(const unsigned int* indices);
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> p_Buffer = nullptr;
 	
@@ -139,15 +140,15 @@ enum class ConstantBufferTarget
 class ConstantBuffer
 {
 public:
-	ConstantBuffer(void* data, size_t size, ConstantBufferTarget target);
+	ConstantBuffer(const void* data, size_t size, ConstantBufferTarget target);
 	~ConstantBuffer() = default;
 
 	void Bind(unsigned int slot = 0);
-	void Unbind();
+	void Unbind() const;
 
-	void Set(void* data);
+	void Set(const void* data);
 
-	ID3D11Buffer* GetBuffer() { return p_Buffer.Get(); }
+	ID3D11Buffer* GetBuffer() const { return p_Buffer.Get(); }
 	void SetUnboundSlot() { m_Slot = -1; }
 
 private:

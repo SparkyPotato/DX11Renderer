@@ -84,8 +84,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.DisplaySize = { 100.f, 100.f };
+	io.Fonts->AddFontFromFileTTF("../../Renderer/Fonts/Roboto-Regular.ttf", 18.f);
 
 	ImGui::StyleColorsDark();
+	auto& style = ImGui::GetStyle();
+	style.FrameRounding = 3.f;
 
 	ImGui_ImplWin32_Init(window);
 

@@ -66,4 +66,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\Renderer\Shaders\UnlitVS.hlsl" />
+    <FxCompile Include="Source\Renderer\Shaders\UnlitSolidPS.hlsl" />
+  </ItemGroup>
 </Project>

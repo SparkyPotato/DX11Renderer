@@ -1,23 +1,23 @@
 #include "Buffer.h"
 #include "GraphicsContext.h"
 
-VertexBuffer::VertexBuffer(const VertexLayout& layout, BufferAccess access, void* data, unsigned int elementCount)
+VertexBuffer::VertexBuffer(const VertexLayout& layout, BufferAccess access, const void* data, unsigned int elementCount)
 	: m_Size(elementCount), m_Layout(layout), m_Access(access)
 {
 	Create(data);
 }
 
-void VertexBuffer::Bind()
+void VertexBuffer::Bind() const
 {
 	GraphicsContext::BindVertexBuffer(this);
 }
 
-void VertexBuffer::Unbind()
+void VertexBuffer::Unbind() const
 {
 	GraphicsContext::BindVertexBuffer(nullptr);
 }
 
-void VertexBuffer::Set(void* data, unsigned int elementCount)
+void VertexBuffer::Set(const void* data, unsigned int elementCount)
 {
 	if (elementCount > m_Size || m_Access == BufferAccess::Static)
 	{
@@ -33,7 +33,7 @@ void VertexBuffer::Set(void* data, unsigned int elementCount)
 	}
 }
 
-void VertexBuffer::Create(void* data)
+void VertexBuffer::Create(const void* data)
 {
 	UINT cpuAccess = 0;
 	D3D11_USAGE usage = D3D11_USAGE_DEFAULT;
@@ -69,23 +69,23 @@ void VertexBuffer::Create(void* data)
 	}
 }
 
-IndexBuffer::IndexBuffer(BufferAccess access, unsigned int* indices, unsigned int indexCount)
+IndexBuffer::IndexBuffer(BufferAccess access, const unsigned int* indices, unsigned int indexCount)
 	: m_Size(indexCount), m_Access(access)
 {
 	Create(indices);
 }
 
-void IndexBuffer::Bind()
+void IndexBuffer::Bind() const
 {
 	GraphicsContext::Context->IASetIndexBuffer(p_Buffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 }
 
-void IndexBuffer::Unbind()
+void IndexBuffer::Unbind() const
 {
 	GraphicsContext::Context->IASetIndexBuffer(NULL, DXGI_FORMAT_UNKNOWN, 0);
 }
 
-void IndexBuffer::Set(unsigned int* indices, unsigned int indexCount)
+void IndexBuffer::Set(const unsigned int* indices, unsigned int indexCount)
 {
 	if (indexCount > m_Size || m_Access == BufferAccess::Static)
 	{
@@ -101,7 +101,7 @@ void IndexBuffer::Set(unsigned int* indices, unsigned int indexCount)
 	}
 }
 
-void IndexBuffer::Create(unsigned int* indices)
+void IndexBuffer::Create(const unsigned int* indices)
 {
 	UINT cpuAccess = 0;
 	D3D11_USAGE usage = D3D11_USAGE_DEFAULT;
@@ -137,7 +137,7 @@ void IndexBuffer::Create(unsigned int* indices)
 	}
 }
 
-ConstantBuffer::ConstantBuffer(void* data, size_t size, ConstantBufferTarget target)
+ConstantBuffer::ConstantBuffer(const void* data, size_t size, ConstantBufferTarget target)
 	: m_Size(size), m_Target(target)
 {
 	D3D11_BUFFER_DESC desc;
@@ -177,7 +177,7 @@ void ConstantBuffer::Bind(unsigned int slot)
 	m_Slot = slot;
 }
 
-void ConstantBuffer::Unbind()
+void ConstantBuffer::Unbind() const
 {
 	switch (m_Target)
 	{
@@ -186,7 +186,7 @@ void ConstantBuffer::Unbind()
 	}
 }
 
-void ConstantBuffer::Set(void* data)
+void ConstantBuffer::Set(const void* data)
 {
 	D3D11_MAPPED_SUBRESOURCE sr;
 	GraphicsContext::Context->Map(p_Buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &sr);
