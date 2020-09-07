@@ -17,6 +17,7 @@ public:
 	void Resize(float aspectRatio);
 
 	DirectX::XMMATRIX GetViewProjection() { return m_ViewProjection; }
+	DirectX::XMVECTOR GetPosition() { return m_Position; }
 
 private:
 	DirectX::XMMATRIX m_Projection;

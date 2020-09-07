@@ -124,10 +124,15 @@ Renderer::Renderer()
 	// Bind the viewport to the pipeline
 	GraphicsContext::Context->RSSetViewports(1, &vp);
 
+	m_MaterialBuffer = new ConstantBuffer(nullptr, sizeof(MaterialBuffer), ConstantBufferTarget::PixelShader);
+	m_LightBuffer = new ConstantBuffer(nullptr, sizeof(LightBuffer), ConstantBufferTarget::PixelShader);
+	m_CameraBuffer = new ConstantBuffer(nullptr, sizeof(CameraBuffer), ConstantBufferTarget::PixelShader);
 	m_ObjectBuffer = new ConstantBuffer(nullptr, sizeof(ObjectBuffer), ConstantBufferTarget::VertexShader);
 
 	m_UnlitVS = new VertexShader(L"UnlitVS.cso");
+
 	m_UnlitSolidPS = new PixelShader(L"UnlitSolidPS.cso");
+	m_LitSolidPS = new PixelShader(L"LitSolidPS.cso");
 
 	
 	m_MainCamera.Resize((float)bbDesc.Width / (float)bbDesc.Height);
@@ -140,8 +145,13 @@ Renderer::~Renderer()
 	if (p_DepthStencil) p_DepthStencil->Release();
 
 	delete m_UnlitVS;
-	delete m_UnlitSolidPS;
 
+	delete m_UnlitSolidPS;
+	delete m_LitSolidPS;
+
+	delete m_CameraBuffer;
+	delete m_MaterialBuffer;
+	delete m_LightBuffer;
 	delete m_ObjectBuffer;
 
 	delete m_Scene;
@@ -158,14 +168,35 @@ void Renderer::Render(float deltaTime)
 	GraphicsContext::Context->OMSetRenderTargets(1, &p_RenderTarget, p_DepthStencil);
 
 	m_UnlitVS->Bind();
-	m_UnlitSolidPS->Bind();
+	m_LitSolidPS->Bind();
+
 	m_ObjectBuffer->Bind(0);
+
+	m_LightBuffer->Bind(0);
+	m_MaterialBuffer->Bind(1);
+	m_CameraBuffer->Bind(2);
+
+	DirectX::XMFLOAT4 float4 = { m_LightPosition[0], m_LightPosition[1], m_LightPosition[2], 1.f };
+	m_LightData.lightPosition = DirectX::XMLoadFloat4(&float4);
+	float4 = { m_AmbientColor[0], m_AmbientColor[1], m_AmbientColor[2], m_AmbientIntensity };
+	m_LightData.ambient = DirectX::XMLoadFloat4(&float4);
+	float4 = { m_SpecularColor[0], m_SpecularColor[1], m_SpecularColor[1], m_SpecularIntensity };
+	m_LightData.specular = DirectX::XMLoadFloat4(&float4);
+	float4 = { m_DiffuseColor[0], m_DiffuseColor[1], m_DiffuseColor[2], m_DiffuseIntensity };
+	m_LightData.diffuse = DirectX::XMLoadFloat4(&float4);
+	m_LightBuffer->Set(&m_LightData);
+
+	m_MaterialBuffer->Set(&m_MaterialData);
+
+	m_CameraData.cameraPosition = m_MainCamera.GetPosition();
+	m_CameraBuffer->Set(&m_CameraData);
 
 	for (auto& object : m_Scene->GetSceneObjects())
 	{
 		m_ObjectData.world = object.worldMatrix;
 		m_ObjectData.worldViewProjection = object.worldMatrix * m_MainCamera.GetViewProjection();
 		m_ObjectBuffer->Set(&m_ObjectData);
+
 		object.vertexBuffer->Bind();
 		object.indexBuffer->Bind();
 
@@ -181,6 +212,7 @@ void Renderer::RenderGui()
 		{
 			ImGui::MenuItem("Camera", "", &m_IsCameraOpen);
 			ImGui::MenuItem("Objects", "", &m_IsSceneOpen);
+			ImGui::MenuItem("Light", "", &m_IsLightOpen);
 
 			ImGui::EndMenu();
 		}
@@ -199,6 +231,34 @@ void Renderer::RenderGui()
 				DirectX::XMFLOAT3 pos = { m_CameraPosition[0], m_CameraPosition[1], m_CameraPosition[2] };
 				m_MainCamera.SetPosition(DirectX::XMLoadFloat3(&pos));
 			}
+
+			ImGui::End();
+		}
+		else
+		{
+			ImGui::End();
+		}
+	}
+
+	if (m_IsLightOpen)
+	{
+		if (ImGui::Begin("Light Controls", &m_IsLightOpen))
+		{
+			ImGui::DragFloat3("Position", m_LightPosition, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+
+			ImGui::ColorEdit3("Ambient Color", m_AmbientColor);
+			ImGui::DragFloat("Ambient Intensity", &m_AmbientIntensity, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+
+			ImGui::ColorEdit3("Diffuse Color", m_DiffuseColor);
+			ImGui::DragFloat("Diffuse Intensity", &m_DiffuseIntensity, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+
+			ImGui::ColorEdit3("Specular Color", m_SpecularColor);
+			ImGui::DragFloat("Specular Intensity", &m_SpecularIntensity, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+
+			ImGui::Text("Attenuation");
+			ImGui::DragFloat("Constant", &m_LightData.attConstant, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+			ImGui::DragFloat("Linear", &m_LightData.attLinear, 0.001f, 0.005f, 0.002f, "%.4f", 1.f);
+			ImGui::DragFloat("Quadratic", &m_LightData.attQuadratic, 0.0001f, 0.005f, 0.002f, "%.5f", 1.f);
 
 			ImGui::End();
 		}

@@ -69,5 +69,6 @@
   <ItemGroup>
     <FxCompile Include="Source\Renderer\Shaders\UnlitVS.hlsl" />
     <FxCompile Include="Source\Renderer\Shaders\UnlitSolidPS.hlsl" />
+    <FxCompile Include="Source\Renderer\Shaders\LitSolidPS.hlsl" />
   </ItemGroup>
 </Project>
