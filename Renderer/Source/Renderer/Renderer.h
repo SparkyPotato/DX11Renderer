@@ -27,7 +27,7 @@ private:
 		float ambient = 1.f;
 		float specular = 1.f;
 		float diffuse = 1.f;
-		float shininess = 1.f;
+		float shininess = 4.f;
 	};
 	ConstantBuffer* m_MaterialBuffer;
 	MaterialBuffer m_MaterialData;
@@ -73,6 +73,7 @@ private:
 
 	bool m_IsCameraOpen = true;
 	float m_CameraPosition[3];
+	float m_CameraRotation[2];
 
 	bool m_IsLightOpen = false;
 	float m_LightPosition[3];

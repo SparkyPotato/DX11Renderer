@@ -89,7 +89,7 @@ class VertexBuffer
 {
 public:
 	VertexBuffer(const VertexLayout& layout, BufferAccess access, const void* data, unsigned int elementCount);
-	~VertexBuffer() = default;
+	~VertexBuffer();
 
 	void Bind() const;
 	void Unbind() const;

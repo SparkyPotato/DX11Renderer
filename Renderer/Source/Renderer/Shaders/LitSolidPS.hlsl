@@ -28,7 +28,7 @@ cbuffer CameraBuffer : register(b2)
 struct PSIn
 {
 	float4 worldPosition : POSITION;
-	float3 normal : NORMAL;
+	noperspective float3 normal : NORMAL;
 	float4 color : COLOR;
 	float2 texcoord : TEXCOORD;
 	float4 outPosition : SV_POSITION;

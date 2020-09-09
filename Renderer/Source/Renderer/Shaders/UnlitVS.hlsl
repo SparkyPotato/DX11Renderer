@@ -15,7 +15,7 @@ struct VSIn
 struct VSOut
 {
 	float4 worldPosition : POSITION;
-	float3 normal : NORMAL;
+	noperspective float3 normal : NORMAL;
 	float4 color : COLOR;
 	float2 texcoord : TEXCOORD;
 	float4 outPosition : SV_POSITION;
@@ -26,7 +26,7 @@ VSOut main(VSIn input)
 	VSOut output;
 	
 	output.worldPosition = mul(float4(input.position, 1.f), world);
-	output.normal = input.normal;
+	output.normal = mul(float4(input.normal, 0.f), world).xyz;
 	output.color = input.color;
 	output.texcoord = input.texcoord;
 	output.outPosition = mul(float4(input.position, 1.f), worldViewProjection);

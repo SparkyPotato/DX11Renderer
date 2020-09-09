@@ -7,6 +7,11 @@ VertexBuffer::VertexBuffer(const VertexLayout& layout, BufferAccess access, cons
 	Create(data);
 }
 
+VertexBuffer::~VertexBuffer()
+{
+	GraphicsContext::BindVertexBuffer(nullptr);
+}
+
 void VertexBuffer::Bind() const
 {
 	GraphicsContext::BindVertexBuffer(this);

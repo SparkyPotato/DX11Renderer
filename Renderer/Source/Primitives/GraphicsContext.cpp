@@ -86,8 +86,6 @@ void GraphicsContext::DeInit()
 
 void GraphicsContext::BindVertexBuffer(const VertexBuffer* buffer)
 {
-	if (m_CurrentVertexBuffer == buffer) return;
-
 	m_LastVertexBuffer = m_CurrentVertexBuffer;
 	m_CurrentVertexBuffer = buffer;
 	
@@ -187,8 +185,8 @@ void GraphicsContext::InputLayoutSetup()
 		ID3D11InputLayout* iLayout;
 		HRESULT hr = Device->CreateInputLayout
 		(
-			layout.data(), (UINT) layout.size(), 
-			m_CurrentVertexShader->GetBlob()->GetBufferPointer(), m_CurrentVertexShader->GetBlob()->GetBufferSize(), 
+			layout.data(), (UINT) layout.size(),
+			m_CurrentVertexShader->GetBlob()->GetBufferPointer(), m_CurrentVertexShader->GetBlob()->GetBufferSize(),
 			&iLayout
 		);
 

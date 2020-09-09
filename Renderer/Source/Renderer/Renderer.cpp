@@ -191,16 +191,16 @@ void Renderer::Render(float deltaTime)
 	m_CameraData.cameraPosition = m_MainCamera.GetPosition();
 	m_CameraBuffer->Set(&m_CameraData);
 
-	for (auto& object : m_Scene->GetSceneObjects())
+	for (auto& object : m_Scene->GetObjects())
 	{
-		m_ObjectData.world = object.worldMatrix;
-		m_ObjectData.worldViewProjection = object.worldMatrix * m_MainCamera.GetViewProjection();
+		m_ObjectData.world = object.GetWorldMatrix();
+		m_ObjectData.worldViewProjection = object.GetWorldMatrix() * m_MainCamera.GetViewProjection();
 		m_ObjectBuffer->Set(&m_ObjectData);
 
-		object.vertexBuffer->Bind();
-		object.indexBuffer->Bind();
+		object.GetVertexBuffer()->Bind();
+		object.GetIndexBuffer()->Bind();
 
-		GraphicsContext::Context->DrawIndexed(object.indexBuffer->GetSize(), 0, 0);
+		GraphicsContext::Context->DrawIndexed(object.GetIndexBuffer()->GetSize(), 0, 0);
 	}
 }
 
@@ -232,6 +232,22 @@ void Renderer::RenderGui()
 				m_MainCamera.SetPosition(DirectX::XMLoadFloat3(&pos));
 			}
 
+			if (ImGui::SliderFloat("Yaw", m_CameraRotation, -180.f, 180.f, "%.1f deg", 1.f))
+			{
+				constexpr float PI = 3.1415926535f;
+
+				DirectX::XMFLOAT3 rotation = { -PI * m_CameraRotation[1] / 180.f, PI * m_CameraRotation[0] / 180.f, 0.f };
+				m_MainCamera.SetRotation(DirectX::XMLoadFloat3(&rotation));
+			}
+
+			if (ImGui::SliderFloat("Pitch", m_CameraRotation + 1, -90.f, 90.f, "%.1f deg", 1.f))
+			{
+				constexpr float PI = 3.1415926535f;
+
+				DirectX::XMFLOAT3 rotation = { -PI * m_CameraRotation[1] / 180.f, PI * m_CameraRotation[0] / 180.f, 0.f };
+				m_MainCamera.SetRotation(DirectX::XMLoadFloat3(&rotation));
+			}
+
 			ImGui::End();
 		}
 		else
@@ -247,18 +263,18 @@ void Renderer::RenderGui()
 			ImGui::DragFloat3("Position", m_LightPosition, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
 
 			ImGui::ColorEdit3("Ambient Color", m_AmbientColor);
-			ImGui::DragFloat("Ambient Intensity", &m_AmbientIntensity, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+			ImGui::SliderFloat("Ambient Intensity", &m_AmbientIntensity, 0.f, 1.f, "%.3f", 1.f);
 
 			ImGui::ColorEdit3("Diffuse Color", m_DiffuseColor);
-			ImGui::DragFloat("Diffuse Intensity", &m_DiffuseIntensity, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+			ImGui::DragFloat("Diffuse Intensity", &m_DiffuseIntensity, 0.01f, 0.f, FLT_MAX / INT_MAX, "%.3f", 1.f);
 
 			ImGui::ColorEdit3("Specular Color", m_SpecularColor);
-			ImGui::DragFloat("Specular Intensity", &m_SpecularIntensity, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+			ImGui::DragFloat("Specular Intensity", &m_SpecularIntensity, 0.01f, 0.f, FLT_MAX / INT_MAX, "%.3f", 1.f);
 
 			ImGui::Text("Attenuation");
-			ImGui::DragFloat("Constant", &m_LightData.attConstant, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
-			ImGui::DragFloat("Linear", &m_LightData.attLinear, 0.001f, 0.005f, 0.002f, "%.4f", 1.f);
-			ImGui::DragFloat("Quadratic", &m_LightData.attQuadratic, 0.0001f, 0.005f, 0.002f, "%.5f", 1.f);
+			ImGui::DragFloat("Constant", &m_LightData.attConstant, 0.01f, 0.f, 10.f, "%.3f", 1.f);
+			ImGui::DragFloat("Linear", &m_LightData.attLinear, 0.001f, 0.f, 1.f, "%.4f", 1.f);
+			ImGui::DragFloat("Quadratic", &m_LightData.attQuadratic, 0.0001f, 0.f, 0.1f, "%.5f", 1.f);
 
 			ImGui::End();
 		}

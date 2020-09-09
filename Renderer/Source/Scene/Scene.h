@@ -3,14 +3,6 @@
 #include <vector>
 
 #include "Object.h"
-#include "Primitives/Buffer.h"
-
-struct SceneObject
-{
-	const DirectX::XMMATRIX worldMatrix;
-	const VertexBuffer* vertexBuffer;
-	const IndexBuffer* indexBuffer;
-};
 
 class Scene
 {
@@ -19,23 +11,18 @@ public:
 	~Scene();
 
 	void AddObject();
-	void AddObjectFromFile(std::string filePath);
+	void AddObjectFromFile(std::string name, std::string filePath);
 
 	void DrawObjects();
 
-	const std::vector<SceneObject>& GetSceneObjects() { return m_SceneObjects; }
+	const std::vector<Object>& GetObjects() { return m_Objects; }
 
 private:
 	bool* m_IsOpen;
+	bool m_ShowName = false;
+	char m_NameBuf[512];
 	IFileOpenDialog* p_FileOpen;
+	std::string m_OpenedFilePath;
 
 	std::vector<Object> m_Objects;
-	std::vector<SceneObject> m_SceneObjects;
-	VertexLayout m_VertexLayout =
-	{
-		{ "POSITION", ElementDataType::float3 },
-		{ "NORMAL", ElementDataType::float3 },
-		{ "COLOR", ElementDataType::float4 },
-		{ "TEXCOORD", ElementDataType::float2 }
-	};
 };

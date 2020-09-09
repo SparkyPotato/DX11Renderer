@@ -1,15 +1,14 @@
-#include "Object.h"
-
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
-#include <Windows.h>
+#include "Object.h"
 
 Object::Object(std::string name, std::string file)
 	: Name(name), m_World(DirectX::XMMatrixIdentity())
 {
 	Assimp::Importer importer;
+	importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90.f);
 	auto scene = importer.ReadFile(file, aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene == nullptr)
@@ -78,4 +77,32 @@ Object::Object(std::string name, std::string file)
 		m_Indices.push_back(mesh->mFaces[i].mIndices[1]);
 		m_Indices.push_back(mesh->mFaces[i].mIndices[2]);
 	}
+
+	m_VertexBuffer = new VertexBuffer(m_VertexLayout, BufferAccess::Static, m_Vertices.data(), (unsigned int) m_Vertices.size());
+	m_IndexBuffer = new IndexBuffer(BufferAccess::Static, m_Indices.data(), (unsigned int) m_Indices.size());
+}
+
+Object::Object(Object&& other) noexcept
+{
+	m_VertexBuffer = other.m_VertexBuffer;
+	other.m_VertexBuffer = nullptr;
+	m_IndexBuffer = other.m_IndexBuffer;
+	other.m_IndexBuffer = nullptr;
+
+	m_Vertices = std::move(other.m_Vertices);
+	m_Indices = std::move(other.m_Indices);
+	Name = std::move(other.Name);
+	m_Material = other.m_Material;
+	m_World = other.m_World;
+}
+
+Object::Object(const Object& other)
+{
+	Name = other.Name;
+}
+
+Object::~Object() noexcept
+{
+	delete m_VertexBuffer;
+	delete m_IndexBuffer;
 }
