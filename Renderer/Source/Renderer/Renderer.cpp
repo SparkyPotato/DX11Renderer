@@ -124,7 +124,7 @@ Renderer::Renderer()
 	// Bind the viewport to the pipeline
 	GraphicsContext::Context->RSSetViewports(1, &vp);
 
-	m_MaterialBuffer = new ConstantBuffer(nullptr, sizeof(MaterialBuffer), ConstantBufferTarget::PixelShader);
+	m_MaterialBuffer = new ConstantBuffer(nullptr, sizeof(Material), ConstantBufferTarget::PixelShader);
 	m_LightBuffer = new ConstantBuffer(nullptr, sizeof(LightBuffer), ConstantBufferTarget::PixelShader);
 	m_CameraBuffer = new ConstantBuffer(nullptr, sizeof(CameraBuffer), ConstantBufferTarget::PixelShader);
 	m_ObjectBuffer = new ConstantBuffer(nullptr, sizeof(ObjectBuffer), ConstantBufferTarget::VertexShader);
@@ -159,6 +159,8 @@ Renderer::~Renderer()
 
 void Renderer::Render(float deltaTime)
 {
+	m_DeltaTime = deltaTime;
+
 	// Clear the render target and depth stencil at the beginning of every frame so we don't have residue left over from the previous frame
 	float color[] = { 0.11f, 0.18f, 0.96f, 1.f };
 	GraphicsContext::Context->ClearRenderTargetView(p_RenderTarget, color);
@@ -186,8 +188,6 @@ void Renderer::Render(float deltaTime)
 	m_LightData.diffuse = DirectX::XMLoadFloat4(&float4);
 	m_LightBuffer->Set(&m_LightData);
 
-	m_MaterialBuffer->Set(&m_MaterialData);
-
 	m_CameraData.cameraPosition = m_MainCamera.GetPosition();
 	m_CameraBuffer->Set(&m_CameraData);
 
@@ -196,6 +196,8 @@ void Renderer::Render(float deltaTime)
 		m_ObjectData.world = object.GetWorldMatrix();
 		m_ObjectData.worldViewProjection = object.GetWorldMatrix() * m_MainCamera.GetViewProjection();
 		m_ObjectBuffer->Set(&m_ObjectData);
+
+		m_MaterialBuffer->Set(&object.GetMaterial());
 
 		object.GetVertexBuffer()->Bind();
 		object.GetIndexBuffer()->Bind();
@@ -213,6 +215,13 @@ void Renderer::RenderGui()
 			ImGui::MenuItem("Camera", "", &m_IsCameraOpen);
 			ImGui::MenuItem("Objects", "", &m_IsSceneOpen);
 			ImGui::MenuItem("Light", "", &m_IsLightOpen);
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Renderer"))
+		{
+			ImGui::MenuItem("Stats", "", &m_IsStatsOpen);
 
 			ImGui::EndMenu();
 		}
@@ -275,6 +284,20 @@ void Renderer::RenderGui()
 			ImGui::DragFloat("Constant", &m_LightData.attConstant, 0.01f, 0.f, 10.f, "%.3f", 1.f);
 			ImGui::DragFloat("Linear", &m_LightData.attLinear, 0.001f, 0.f, 1.f, "%.4f", 1.f);
 			ImGui::DragFloat("Quadratic", &m_LightData.attQuadratic, 0.0001f, 0.f, 0.1f, "%.5f", 1.f);
+
+			ImGui::End();
+		}
+		else
+		{
+			ImGui::End();
+		}
+	}
+
+	if (m_IsStatsOpen)
+	{
+		if (ImGui::Begin("Statistics", &m_IsStatsOpen))
+		{
+			ImGui::Text("Delta Time: %.3f ms", m_DeltaTime * 1000);
 
 			ImGui::End();
 		}

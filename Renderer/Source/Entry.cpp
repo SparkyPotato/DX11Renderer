@@ -120,24 +120,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	// Variable that keeps track of delta time
-	float deltaTime;
+	float deltaTime = 0.f;
 
 	MSG message;
 	// This is the main loop of the application and continues till the window is closed
 	while (IsRunning)
 	{
+		// Get the time before the frame
+		QueryPerformanceCounter(&lastTickTime);
+
 		// Windows event handler to ensure our application responds to window events
 		while (PeekMessage(&message, window, NULL, NULL, PM_REMOVE))
 		{
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		}
-
-		// Get the time before the frame
-		QueryPerformanceCounter(&currentTickTime);
-		// Calculate the delta time (in seconds)
-		deltaTime = (float)currentTickTime.QuadPart - (float)lastTickTime.QuadPart;
-		deltaTime /= frequency.QuadPart;
 
 		// Render
 		GRenderer->Render(deltaTime);
@@ -159,7 +156,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GraphicsContext::SwapChain->Present(0, 0);
 
 		// Get the time after the tick
-		QueryPerformanceCounter(&lastTickTime);
+		QueryPerformanceCounter(&currentTickTime);
+
+		// Calculate the delta time (in seconds)
+		deltaTime = (float) (currentTickTime.QuadPart - lastTickTime.QuadPart);
+		deltaTime /= frequency.QuadPart;
 	}
 
 	// Delete the renderer

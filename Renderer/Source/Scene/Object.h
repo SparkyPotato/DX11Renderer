@@ -25,6 +25,7 @@ struct Vertex
 
 struct Material
 {
+	float color[4] = { 1.f, 1.f, 1.f, 1.f };
 	float ambient = 1.f;
 	float specular = 1.f;
 	float diffuse = 1.f;
@@ -52,7 +53,7 @@ public:
 
 	std::string Name;
 
-	const Material& GetMaterial() const { return m_Material; }
+	Material& GetMaterial() { return m_Material; }
 	const std::vector<Vertex>& GetVertices() const { return m_Vertices; }
 	const std::vector<unsigned int>& GetIndices() const { return m_Indices; }
 

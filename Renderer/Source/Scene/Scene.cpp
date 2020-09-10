@@ -109,12 +109,16 @@ void Scene::DrawObjects()
 			ImGui::BeginChild("Objects");
 			for (auto& object : m_Objects)
 			{
-				ImGui::Selectable(object.Name.c_str());
+				if (ImGui::Selectable(object.Name.c_str(), p_CurrentObject == &object))
+				{
+					p_CurrentObject = &object;
+				}
 
 				if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight))
 				{
 					if (ImGui::Selectable("Delete"))
 					{
+						if (p_CurrentObject == &object) p_CurrentObject = nullptr;
 						auto it = std::find(m_Objects.begin(), m_Objects.end(), object);
 						m_Objects.erase(it);
 						ImGui::EndPopup();
@@ -155,6 +159,30 @@ void Scene::DrawObjects()
 			}
 
 			ImGui::EndPopup();
+		}
+
+		DrawProperties();
+	}
+}
+
+void Scene::DrawProperties()
+{
+	if (p_CurrentObject)
+	{
+		if (ImGui::Begin("Properties"))
+		{
+			ImGui::Text("Material");
+			ImGui::ColorEdit3("Color", p_CurrentObject->GetMaterial().color);
+			ImGui::SliderFloat("Ambient Reflection", &p_CurrentObject->GetMaterial().ambient, 0.f, 1.f, "%.3f", 1.f);
+			ImGui::SliderFloat("Diffuse Reflection", &p_CurrentObject->GetMaterial().diffuse, 0.f, 1.f, "%.3f", 1.f);
+			ImGui::SliderFloat("Specular Reflection", &p_CurrentObject->GetMaterial().specular, 0.f, 1.f, "%.3f", 1.f);
+			ImGui::DragFloat("Shininess", &p_CurrentObject->GetMaterial().shininess, 0.1f, 1.f, FLT_MAX / INT_MAX, "%.3f", 1.f);
+
+			ImGui::End();
+		}
+		else
+		{
+			ImGui::End();
 		}
 	}
 }

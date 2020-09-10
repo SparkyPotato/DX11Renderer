@@ -14,6 +14,7 @@ cbuffer LightBuffer : register(b0)
 
 cbuffer MaterialBuffer : register(b1)
 {
+	float4 materialColor;
 	float ambientReflection;
 	float specularReflection;
 	float diffuseReflection;
@@ -61,9 +62,9 @@ float4 main(PSIn input) : SV_TARGET
 	
 		float3 specularValue = intensity * specularReflection * specularColor * specularIntensity * attenuation;
 		
-		return float4(saturate(ambientValue + diffuseValue + specularValue) * input.color.rgb, input.color.a);
+		return float4(saturate(ambientValue + diffuseValue + specularValue) * input.color.rgb, input.color.a) * materialColor;
 	}
 	
-	return float4(saturate(ambientValue) * input.color.rgb, input.color.a);
+	return float4(saturate(ambientValue) * input.color.rgb, input.color.a) * materialColor;
 
 }

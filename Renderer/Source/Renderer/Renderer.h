@@ -22,15 +22,7 @@ private:
 	ID3D11RenderTargetView* p_RenderTarget = nullptr;
 	ID3D11DepthStencilView* p_DepthStencil = nullptr;
 
-	struct MaterialBuffer
-	{
-		float ambient = 1.f;
-		float specular = 1.f;
-		float diffuse = 1.f;
-		float shininess = 4.f;
-	};
 	ConstantBuffer* m_MaterialBuffer;
-	MaterialBuffer m_MaterialData;
 
 	struct LightBuffer
 	{
@@ -83,4 +75,7 @@ private:
 	float m_SpecularIntensity;
 	float m_DiffuseColor[3];
 	float m_DiffuseIntensity;
+
+	bool m_IsStatsOpen = false;
+	float m_DeltaTime = 0.f;
 };

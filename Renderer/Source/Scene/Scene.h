@@ -15,9 +15,11 @@ public:
 
 	void DrawObjects();
 
-	const std::vector<Object>& GetObjects() { return m_Objects; }
+	std::vector<Object>& GetObjects() { return m_Objects; }
 
 private:
+	void DrawProperties();
+
 	bool* m_IsOpen;
 	bool m_ShowName = false;
 	char m_NameBuf[512];
@@ -25,4 +27,5 @@ private:
 	std::string m_OpenedFilePath;
 
 	std::vector<Object> m_Objects;
+	Object* p_CurrentObject = nullptr;
 };
