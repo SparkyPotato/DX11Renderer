@@ -19,6 +19,7 @@ public:
 
 private:
 	void DrawProperties();
+	void SetCurrentObject(Object* object);
 
 	bool* m_IsOpen;
 	bool m_ShowName = false;
@@ -28,4 +29,6 @@ private:
 
 	std::vector<Object> m_Objects;
 	Object* p_CurrentObject = nullptr;
+	float m_ObjectPosition[3];
+	float m_ObjectRotation[3];
 };

@@ -241,19 +241,15 @@ void Renderer::RenderGui()
 				m_MainCamera.SetPosition(DirectX::XMLoadFloat3(&pos));
 			}
 
-			if (ImGui::SliderFloat("Yaw", m_CameraRotation, -180.f, 180.f, "%.1f deg", 1.f))
+			if (ImGui::SliderAngle("Yaw", m_CameraRotation, -180.f, 180.f))
 			{
-				constexpr float PI = 3.1415926535f;
-
-				DirectX::XMFLOAT3 rotation = { -PI * m_CameraRotation[1] / 180.f, PI * m_CameraRotation[0] / 180.f, 0.f };
+				DirectX::XMFLOAT3 rotation = { -m_CameraRotation[1],  m_CameraRotation[0], 0.f };
 				m_MainCamera.SetRotation(DirectX::XMLoadFloat3(&rotation));
 			}
 
-			if (ImGui::SliderFloat("Pitch", m_CameraRotation + 1, -90.f, 90.f, "%.1f deg", 1.f))
+			if (ImGui::SliderAngle("Pitch", m_CameraRotation + 1, -90.f, 90.f))
 			{
-				constexpr float PI = 3.1415926535f;
-
-				DirectX::XMFLOAT3 rotation = { -PI * m_CameraRotation[1] / 180.f, PI * m_CameraRotation[0] / 180.f, 0.f };
+				DirectX::XMFLOAT3 rotation = { -m_CameraRotation[1], m_CameraRotation[0], 0.f };
 				m_MainCamera.SetRotation(DirectX::XMLoadFloat3(&rotation));
 			}
 

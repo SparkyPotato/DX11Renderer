@@ -109,10 +109,7 @@ void Scene::DrawObjects()
 			ImGui::BeginChild("Objects");
 			for (auto& object : m_Objects)
 			{
-				if (ImGui::Selectable(object.Name.c_str(), p_CurrentObject == &object))
-				{
-					p_CurrentObject = &object;
-				}
+				if (ImGui::Selectable(object.Name.c_str(), p_CurrentObject == &object)) { SetCurrentObject(&object); }
 
 				if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight))
 				{
@@ -171,6 +168,22 @@ void Scene::DrawProperties()
 	{
 		if (ImGui::Begin("Properties"))
 		{
+			ImGui::Text("Transform");
+			if (ImGui::DragFloat3("Position", m_ObjectPosition, 0.1f, 0.f, -1.f, "%.3f", 1.f))
+			{
+				DirectX::XMFLOAT3 pos = { m_ObjectPosition[0], m_ObjectPosition[1], m_ObjectPosition[2] };
+				p_CurrentObject->SetPosition(DirectX::XMLoadFloat3(&pos));
+			}
+			if (ImGui::DragFloat3("Rotation", m_ObjectRotation, 5.f, -180.f, 180.f))
+			{
+				constexpr float PI = 3.1415926535f;
+
+				DirectX::XMFLOAT3 rot = { -PI * m_ObjectRotation[0] / 180.f, -PI * m_ObjectRotation[1] / 180.f, -PI * m_ObjectRotation[2] / 180.f };
+				p_CurrentObject->SetRotation(DirectX::XMLoadFloat3(&rot));
+			}
+
+			ImGui::Separator();
+
 			ImGui::Text("Material");
 			ImGui::ColorEdit3("Color", p_CurrentObject->GetMaterial().color);
 			ImGui::SliderFloat("Ambient Reflection", &p_CurrentObject->GetMaterial().ambient, 0.f, 1.f, "%.3f", 1.f);
@@ -185,4 +198,9 @@ void Scene::DrawProperties()
 			ImGui::End();
 		}
 	}
+}
+
+void Scene::SetCurrentObject(Object* object)
+{
+	p_CurrentObject = object;
 }

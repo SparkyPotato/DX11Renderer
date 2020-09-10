@@ -5,7 +5,7 @@
 #include "Object.h"
 
 Object::Object(std::string name, std::string file)
-	: Name(name), m_World(DirectX::XMMatrixIdentity())
+	: Name(name), m_World(DirectX::XMMatrixIdentity()), m_Position(DirectX::XMVectorZero()), m_Rotation(DirectX::XMVectorZero())
 {
 	Assimp::Importer importer;
 	importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90.f);
@@ -105,4 +105,9 @@ Object::~Object() noexcept
 {
 	delete m_VertexBuffer;
 	delete m_IndexBuffer;
+}
+
+void Object::CalculateMatrix()
+{
+	m_World =  DirectX::XMMatrixRotationRollPitchYawFromVector(m_Rotation) * DirectX::XMMatrixTranslationFromVector(m_Position);
 }

@@ -62,11 +62,21 @@ public:
 
 	const DirectX::XMMATRIX& GetWorldMatrix() const { return m_World; }
 
+	const DirectX::XMVECTOR& GetPosition() const { return m_Position; }
+	void SetPosition(const DirectX::XMVECTOR& position) { m_Position = position; CalculateMatrix(); }
+	const DirectX::XMVECTOR& GetRotation() const { return m_Rotation; }
+	void SetRotation(const DirectX::XMVECTOR& rotation) { m_Rotation = rotation; CalculateMatrix(); }
+
 private:
+	void CalculateMatrix();
+
 	std::vector<Vertex> m_Vertices;
 	std::vector<unsigned int> m_Indices;
 	Material m_Material;
+
 	DirectX::XMMATRIX m_World;
+	DirectX::XMVECTOR m_Position;
+	DirectX::XMVECTOR m_Rotation;
 
 	VertexBuffer* m_VertexBuffer = nullptr;
 	IndexBuffer* m_IndexBuffer = nullptr;
