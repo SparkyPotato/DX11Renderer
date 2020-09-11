@@ -1,3 +1,12 @@
+cbuffer MaterialBuffer : register(b1)
+{
+	float4 materialColor;
+	float ambientReflection;
+	float specularReflection;
+	float diffuseReflection;
+	float shininess;
+}
+
 struct PSIn
 {
 	float4 worldPosition : POSITION;
@@ -9,5 +18,5 @@ struct PSIn
 
 float4 main(PSIn input) : SV_TARGET
 {
-	return input.color;
+	return input.color * materialColor;
 }

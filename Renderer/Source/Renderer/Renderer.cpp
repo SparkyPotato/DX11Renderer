@@ -4,11 +4,9 @@
 #include "imgui.h"
 
 #include "Renderer.h"
-#include "Scene/Scene.h"
-#include "Scene/Object.h"
 
 Renderer::Renderer()
-	: m_MainCamera(ProjectionMode::Perspective, 1.f, 2.5f, 1000.f)
+	: m_MainCamera(ProjectionMode::Perspective, 1.f, 2.5f, 1000.f), m_Light("Light", "../../Renderer/Meshes/light.fbx")
 {
 	// Grab the back buffer from the swap chain
 	ID3D11Texture2D* backBuffer;
@@ -170,9 +168,6 @@ void Renderer::Render(float deltaTime)
 	// Make sure we're rendering to our render target, because it could've been recreated on a resize event
 	GraphicsContext::Context->OMSetRenderTargets(1, &p_RenderTarget, p_DepthStencil);
 
-	m_UnlitVS->Bind();
-	m_LitSolidPS->Bind();
-
 	m_ObjectBuffer->Bind(0);
 
 	m_LightBuffer->Bind(0);
@@ -184,6 +179,8 @@ void Renderer::Render(float deltaTime)
 	m_CameraData.cameraPosition = m_MainCamera.GetPosition();
 	m_CameraBuffer->Set(&m_CameraData);
 
+	m_UnlitVS->Bind();
+	m_LitSolidPS->Bind();
 	for (auto& object : m_Scene->GetObjects())
 	{
 		m_ObjectData.world = object.GetWorldMatrix();
@@ -198,6 +195,18 @@ void Renderer::Render(float deltaTime)
 		++m_Stats.drawCalls;
 		GraphicsContext::Context->DrawIndexed(object.GetIndexBuffer()->GetSize(), 0, 0);
 	}
+
+	m_UnlitSolidPS->Bind();
+
+	m_ObjectData.world = m_Light.GetWorldMatrix();
+	m_ObjectData.worldViewProjection = m_Light.GetWorldMatrix() * m_MainCamera.GetViewProjection();
+	m_ObjectBuffer->Set(&m_ObjectData);
+	m_MaterialBuffer->Set(&m_Light.GetMaterial());
+
+	m_Light.GetVertexBuffer()->Bind();
+	m_Light.GetIndexBuffer()->Bind();
+	++m_Stats.drawCalls;
+	GraphicsContext::Context->DrawIndexed(m_Light.GetIndexBuffer()->GetSize(), 0, 0);
 }
 
 void Renderer::RenderGui()
@@ -264,9 +273,17 @@ void Renderer::RenderGui()
 
 			ImGui::Separator();
 
-			ImGui::DragFloat3("Position", (float*) &m_LightData.lightPosition, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+			if (ImGui::DragFloat3("Position", (float*) &m_LightData.lightPosition, 0.01f, 0.005f, 0.002f, "%.3f", 1.f))
+			{
+				m_Light.SetPosition(DirectX::XMLoadFloat4(&m_LightData.lightPosition));
+			}
 
-			ImGui::ColorEdit3("Color",(float*) &m_LightData.color);
+			if (ImGui::ColorEdit3("Color", (float*)&m_LightData.color))
+			{
+				m_Light.GetMaterial().color[0] = m_LightData.color.x;
+				m_Light.GetMaterial().color[1] = m_LightData.color.y;
+				m_Light.GetMaterial().color[2] = m_LightData.color.z;
+			}
 			ImGui::DragFloat("Intensity", &m_LightData.intensity, 0.01f, 0.f, FLT_MAX / INT_MAX, "%.3f", 1.f);
 
 			ImGui::Text("Attenuation");

@@ -4,6 +4,7 @@
 #include "Primitives/Shader.h"
 
 #include "Scene/Camera.h"
+#include "Scene/Scene.h"
 
 class Scene;
 
@@ -34,10 +35,10 @@ private:
 	struct LightBuffer
 	{
 		DirectX::XMFLOAT4 lightPosition;
-		DirectX::XMFLOAT3 ambient;
-		float ambientIntensity;
-		DirectX::XMFLOAT3 color;
-		float intensity;
+		DirectX::XMFLOAT3 ambient = { 1.f, 1.f, 1.f };
+		float ambientIntensity = 0.1f;
+		DirectX::XMFLOAT3 color = { 1.f, 1.f, 1.f };
+		float intensity = 1.f;
 		float attConstant = 1.0f;
 		float attLinear = 0.045f;
 		float attQuadratic = 0.0075f;
@@ -79,6 +80,7 @@ private:
 	float m_CameraRotation[2];
 
 	bool m_IsLightOpen = false;
+	Object m_Light;
 
 	bool m_IsStatsOpen = false;
 	float m_DeltaTime = 0.f;
