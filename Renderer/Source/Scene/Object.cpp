@@ -93,7 +93,10 @@ Object::Object(Object&& other) noexcept
 	m_Indices = std::move(other.m_Indices);
 	Name = std::move(other.Name);
 	m_Material = other.m_Material;
+
 	m_World = other.m_World;
+	m_Position = other.m_Position;
+	m_Rotation = other.m_Rotation;
 }
 
 Object::Object(const Object& other)

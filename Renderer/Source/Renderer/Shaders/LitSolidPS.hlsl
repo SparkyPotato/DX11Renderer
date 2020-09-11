@@ -4,7 +4,7 @@ cbuffer LightBuffer : register(b0)
 	float3 ambientColor;
 	float ambientIntensity;
 	float3 color;
-	float intensity;
+	float lightIntensity;
 	float attConstant;
 	float attLinear;
 	float attQuadratic;
@@ -49,7 +49,7 @@ float4 main(PSIn input) : SV_TARGET
 	float normalDot = max(dot(lightDirection, input.normal), 0.f);
 	float intensity = saturate(normalDot);
 	
-	float3 diffuseValue = intensity * color * intensity * diffuseReflection * attenuation;
+	float3 diffuseValue = intensity * color * lightIntensity * diffuseReflection * attenuation;
 	
 	if (length(diffuseValue) != 0)
 	{
@@ -58,7 +58,7 @@ float4 main(PSIn input) : SV_TARGET
 		float viewDot = max(dot(reflection, view), 0.f);
 		intensity = pow(saturate(viewDot), shininess);
 	
-		float3 specularValue = intensity * specularReflection * color * intensity * attenuation;
+		float3 specularValue = intensity * color * lightIntensity * specularReflection * attenuation;
 		
 		return float4(saturate(ambientValue + diffuseValue + specularValue) * input.color.rgb, input.color.a) * materialColor;
 	}

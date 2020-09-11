@@ -31,7 +31,7 @@ private:
 
 	RendererStats m_Stats;
 
-	struct alignas(16) LightBuffer
+	struct LightBuffer
 	{
 		DirectX::XMFLOAT4 lightPosition;
 		DirectX::XMFLOAT3 ambient;
@@ -41,6 +41,9 @@ private:
 		float attConstant = 1.0f;
 		float attLinear = 0.045f;
 		float attQuadratic = 0.0075f;
+
+	private:
+		float p0;
 	};
 	ConstantBuffer* m_LightBuffer;
 	LightBuffer m_LightData;
