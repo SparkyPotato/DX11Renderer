@@ -160,6 +160,7 @@ Renderer::~Renderer()
 void Renderer::Render(float deltaTime)
 {
 	m_DeltaTime = deltaTime;
+	m_Stats.drawCalls = 0;
 
 	// Clear the render target and depth stencil at the beginning of every frame so we don't have residue left over from the previous frame
 	float color[] = { 0.11f, 0.18f, 0.96f, 1.f };
@@ -178,14 +179,6 @@ void Renderer::Render(float deltaTime)
 	m_MaterialBuffer->Bind(1);
 	m_CameraBuffer->Bind(2);
 
-	DirectX::XMFLOAT4 float4 = { m_LightPosition[0], m_LightPosition[1], m_LightPosition[2], 1.f };
-	m_LightData.lightPosition = DirectX::XMLoadFloat4(&float4);
-	float4 = { m_AmbientColor[0], m_AmbientColor[1], m_AmbientColor[2], m_AmbientIntensity };
-	m_LightData.ambient = DirectX::XMLoadFloat4(&float4);
-	float4 = { m_SpecularColor[0], m_SpecularColor[1], m_SpecularColor[1], m_SpecularIntensity };
-	m_LightData.specular = DirectX::XMLoadFloat4(&float4);
-	float4 = { m_DiffuseColor[0], m_DiffuseColor[1], m_DiffuseColor[2], m_DiffuseIntensity };
-	m_LightData.diffuse = DirectX::XMLoadFloat4(&float4);
 	m_LightBuffer->Set(&m_LightData);
 
 	m_CameraData.cameraPosition = m_MainCamera.GetPosition();
@@ -202,6 +195,7 @@ void Renderer::Render(float deltaTime)
 		object.GetVertexBuffer()->Bind();
 		object.GetIndexBuffer()->Bind();
 
+		++m_Stats.drawCalls;
 		GraphicsContext::Context->DrawIndexed(object.GetIndexBuffer()->GetSize(), 0, 0);
 	}
 }
@@ -265,16 +259,15 @@ void Renderer::RenderGui()
 	{
 		if (ImGui::Begin("Light Controls", &m_IsLightOpen))
 		{
-			ImGui::DragFloat3("Position", m_LightPosition, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
+			ImGui::ColorEdit3("Ambient Color", (float*) &m_LightData.ambient);
+			ImGui::SliderFloat("Ambient Intensity", &m_LightData.ambientIntensity, 0.f, 1.f, "%.3f", 1.f);
 
-			ImGui::ColorEdit3("Ambient Color", m_AmbientColor);
-			ImGui::SliderFloat("Ambient Intensity", &m_AmbientIntensity, 0.f, 1.f, "%.3f", 1.f);
+			ImGui::Separator();
 
-			ImGui::ColorEdit3("Diffuse Color", m_DiffuseColor);
-			ImGui::DragFloat("Diffuse Intensity", &m_DiffuseIntensity, 0.01f, 0.f, FLT_MAX / INT_MAX, "%.3f", 1.f);
+			ImGui::DragFloat3("Position", (float*) &m_LightData.lightPosition, 0.01f, 0.005f, 0.002f, "%.3f", 1.f);
 
-			ImGui::ColorEdit3("Specular Color", m_SpecularColor);
-			ImGui::DragFloat("Specular Intensity", &m_SpecularIntensity, 0.01f, 0.f, FLT_MAX / INT_MAX, "%.3f", 1.f);
+			ImGui::ColorEdit3("Color",(float*) &m_LightData.color);
+			ImGui::DragFloat("Intensity", &m_LightData.intensity, 0.01f, 0.f, FLT_MAX / INT_MAX, "%.3f", 1.f);
 
 			ImGui::Text("Attenuation");
 			ImGui::DragFloat("Constant", &m_LightData.attConstant, 0.01f, 0.f, 10.f, "%.3f", 1.f);
@@ -294,6 +287,15 @@ void Renderer::RenderGui()
 		if (ImGui::Begin("Statistics", &m_IsStatsOpen))
 		{
 			ImGui::Text("Delta Time: %.3f ms", m_DeltaTime * 1000);
+			ImGui::Separator();
+
+			auto& stats = m_Scene->GetStats();
+			ImGui::Text("Objects: %d", stats.objects);
+			ImGui::Text("Vertices: %d", stats.vertices);
+			ImGui::Text("Faces: %d", stats.triangles);
+			ImGui::Separator();
+
+			ImGui::Text("Draw Calls: %d", m_Stats.drawCalls);
 
 			ImGui::End();
 		}

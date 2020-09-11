@@ -4,6 +4,13 @@
 
 #include "Object.h"
 
+struct SceneStats
+{
+	unsigned int objects = 0;
+	unsigned int vertices = 0;
+	unsigned int triangles = 0;
+};
+
 class Scene
 {
 public:
@@ -16,6 +23,7 @@ public:
 	void DrawObjects();
 
 	std::vector<Object>& GetObjects() { return m_Objects; }
+	const SceneStats& GetStats() { return m_Stats; }
 
 private:
 	void DrawProperties();
@@ -26,6 +34,8 @@ private:
 	char m_NameBuf[512];
 	IFileOpenDialog* p_FileOpen;
 	std::string m_OpenedFilePath;
+
+	SceneStats m_Stats;
 
 	std::vector<Object> m_Objects;
 	Object* p_CurrentObject = nullptr;

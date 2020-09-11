@@ -90,7 +90,11 @@ void Scene::AddObjectFromFile(std::string name, std::string filePath)
 {
 	try
 	{
-		m_Objects.emplace_back(name, filePath);
+		p_CurrentObject = nullptr;
+		auto& obj = m_Objects.emplace_back(name, filePath);
+		++m_Stats.objects;
+		m_Stats.vertices += obj.GetVertices().size();
+		m_Stats.triangles += obj.GetIndices().size() / 3;
 	}
 	catch (...) {}
 }
@@ -116,6 +120,11 @@ void Scene::DrawObjects()
 					if (ImGui::Selectable("Delete"))
 					{
 						if (p_CurrentObject == &object) p_CurrentObject = nullptr;
+
+						--m_Stats.objects;
+						m_Stats.vertices -= object.GetVertices().size();
+						m_Stats.triangles -= object.GetIndices().size() / 3;
+
 						auto it = std::find(m_Objects.begin(), m_Objects.end(), object);
 						m_Objects.erase(it);
 						ImGui::EndPopup();
@@ -202,5 +211,17 @@ void Scene::DrawProperties()
 
 void Scene::SetCurrentObject(Object* object)
 {
+	constexpr float PI = 3.1415926535f;
+
 	p_CurrentObject = object;
+
+	DirectX::XMFLOAT3 float3;
+	DirectX::XMStoreFloat3(&float3, object->GetPosition());
+	m_ObjectPosition[0] = float3.x;
+	m_ObjectPosition[1] = float3.y;
+	m_ObjectPosition[2] = float3.z;
+	DirectX::XMStoreFloat3(&float3, object->GetRotation());
+	m_ObjectRotation[0] = float3.x * 180.f / -PI;
+	m_ObjectRotation[0] = float3.y * 180.f / -PI;
+	m_ObjectRotation[0] = float3.z * 180.f / -PI;
 }

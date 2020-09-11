@@ -7,6 +7,11 @@
 
 class Scene;
 
+struct RendererStats
+{
+	unsigned int drawCalls = 0;
+};
+
 class Renderer
 {
 public:
@@ -24,12 +29,15 @@ private:
 
 	ConstantBuffer* m_MaterialBuffer;
 
-	struct LightBuffer
+	RendererStats m_Stats;
+
+	struct alignas(16) LightBuffer
 	{
-		DirectX::XMVECTOR lightPosition;
-		DirectX::XMVECTOR ambient;
-		DirectX::XMVECTOR specular;
-		DirectX::XMVECTOR diffuse;
+		DirectX::XMFLOAT4 lightPosition;
+		DirectX::XMFLOAT3 ambient;
+		float ambientIntensity;
+		DirectX::XMFLOAT3 color;
+		float intensity;
 		float attConstant = 1.0f;
 		float attLinear = 0.045f;
 		float attQuadratic = 0.0075f;
@@ -68,13 +76,6 @@ private:
 	float m_CameraRotation[2];
 
 	bool m_IsLightOpen = false;
-	float m_LightPosition[3];
-	float m_AmbientColor[3];
-	float m_AmbientIntensity;
-	float m_SpecularColor[3];
-	float m_SpecularIntensity;
-	float m_DiffuseColor[3];
-	float m_DiffuseIntensity;
 
 	bool m_IsStatsOpen = false;
 	float m_DeltaTime = 0.f;
